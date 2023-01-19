@@ -1,37 +1,52 @@
 package ru.yandex.practicum.javafilmorate.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.javafilmorate.exceptions.FilmDescriptionIsTooLongException;
-import ru.yandex.practicum.javafilmorate.exceptions.FilmDurationIsNegativeValueException;
-import ru.yandex.practicum.javafilmorate.exceptions.FilmNameNullOrEmptyException;
-import ru.yandex.practicum.javafilmorate.exceptions.FilmReleaseDateException;
+import org.springframework.context.ConfigurableApplicationContext;
+import ru.yandex.practicum.javafilmorate.JavaFilmorateApplication;
 import ru.yandex.practicum.javafilmorate.model.Film;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
 class FilmControllerTest {
 
-    private static Film titanicWithoutName;
+    private static ConfigurableApplicationContext app;
+    private static final int PORT = 8080;
+
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .findAndRegisterModules()
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+    private static Film titanicWithEmptyName;
     private static Film titanicWithTooLongDescription;
     private static Film titanicWithNegativeDuration;
     private static Film titanicWithTooOldReleaseDate;
-    public static FilmController filmController;
 
     @BeforeAll
-    static void beforeAll(){
+    static void beforeAll() {
 
-        filmController = new FilmController();
+        app = SpringApplication.run(JavaFilmorateApplication.class);
 
-        titanicWithoutName = Film.builder().id(1)
-                                            .description("Test description")
-                                            .duration(Duration.ofMinutes(90))
-                                            .releaseDate(LocalDate.of(1997, 1, 23))
-                                            .build();
+        titanicWithEmptyName = Film.builder().id(1)
+                .name("")
+                .description("Test description")
+                .duration(Duration.ofMinutes(90))
+                .releaseDate(LocalDate.of(1997, 1, 23))
+                .build();
 
         String tooLongDescription = "Test description Test description Test description" +
                 " Test description Test description Test description" +
@@ -59,53 +74,79 @@ class FilmControllerTest {
                 .duration(Duration.ofMinutes(90))
                 .releaseDate(LocalDate.of(1797, 1, 23))
                 .build();
+    }
 
+    @AfterAll
+    static void afterAll(){
+        app.close();
     }
 
     @Test
-    public void shouldReturnFilmNameNullOrEmptyException(){
+    public void shouldReturnFilmNameNullOrEmptyException() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:" + PORT + "/films");
+        String requestBody = objectMapper.writeValueAsString(titanicWithEmptyName);
 
-        FilmNameNullOrEmptyException ex =
-                assertThrows(FilmNameNullOrEmptyException.class,
-                        () -> filmController.validateFilm(titanicWithoutName));
-
-        String exceptionMessage = "Имя фильма не может быть "
-                + " не задано или пустой строкой";
-        assertEquals(exceptionMessage, ex.getMessage());
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest
+                        .BodyPublishers
+                        .ofString(requestBody))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(400, response.statusCode());
     }
 
     @Test
-    public void shouldReturnFilmDescriptionTooLongException(){
+    public void shouldReturnFilmDescriptionTooLongException() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:" + PORT + "/films");
+        String requestBody = objectMapper.writeValueAsString(titanicWithTooLongDescription);
 
-        FilmDescriptionIsTooLongException ex =
-                assertThrows(FilmDescriptionIsTooLongException.class,
-                        () -> filmController.validateFilm(titanicWithTooLongDescription));
-
-        String exceptionMessage = "Длина описания больше 200 символов";
-        assertEquals(exceptionMessage, ex.getMessage());
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest
+                        .BodyPublishers
+                        .ofString(requestBody))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(400, response.statusCode());
     }
 
     @Test
-    public void shouldReturnFilmDurationIsNegativeValueException(){
+    public void shouldReturnFilmDurationIsNegativeValueException() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:" + PORT + "/films");
+        String requestBody = objectMapper.writeValueAsString(titanicWithNegativeDuration);
 
-        FilmDurationIsNegativeValueException ex =
-                assertThrows(FilmDurationIsNegativeValueException.class,
-                        () -> filmController.validateFilm(titanicWithNegativeDuration));
-
-        String exceptionMessage = "Длительность фильма должна быть больше 0 сек.";
-        assertEquals(exceptionMessage, ex.getMessage());
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest
+                        .BodyPublishers
+                        .ofString(requestBody))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(500, response.statusCode());
     }
 
     @Test
-    public void shouldReturnFilmReleaseDateException(){
+    public void shouldReturnFilmReleaseDateException() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:" + PORT + "/films");
+        String requestBody = objectMapper.writeValueAsString(titanicWithTooOldReleaseDate);
 
-        FilmReleaseDateException ex =
-                assertThrows(FilmReleaseDateException.class,
-                        () -> filmController.validateFilm(titanicWithTooOldReleaseDate));
-
-        String exceptionMessage = "Слишком старая дата релиза."
-                + " Можно добавить фильмы с датой релиза после 28.12.1895";
-        assertEquals(exceptionMessage, ex.getMessage());
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest
+                        .BodyPublishers
+                        .ofString(requestBody))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(500, response.statusCode());
     }
 
 

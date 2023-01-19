@@ -1,45 +1,46 @@
 package ru.yandex.practicum.javafilmorate.controllers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.javafilmorate.exceptions.*;
 import ru.yandex.practicum.javafilmorate.model.User;
+import ru.yandex.practicum.javafilmorate.util.LocalDateValidator;
+import ru.yandex.practicum.javafilmorate.util.StringValidator;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@Slf4j
 public class UserController {
 
-    private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private int idToNewUser = 1;
 
-    private int generateUserId(){
+    private int generateUserId() {
         int idToSet = idToNewUser;
         idToNewUser++;
         return idToSet;
     }
 
-    HashMap<Integer, User> users = new HashMap<>();
+    private final HashMap<Integer, User> users = new HashMap<>();
 
-    @PostMapping()
-    public User addNewUser(@RequestBody @Valid User user){
+    @PostMapping
+    public User addNewUser(@RequestBody @Valid User user) {
 
         log.info("Получен запрос 'POST /users'");
 
-        if(validateUser(user)){
+        if (validateUser(user)) {
             // Проверяю, что в коллекции нет пользователья с такими же именем, логином, email
             // и датой рождения
-            if(users.containsValue(user)) {
+            if (users.containsValue(user)) {
                 String exceptionMessage = "Пользователь уже добавлен";
                 log.warn("Ошибка при добавлении нового пользователя. Сообщение исключения: {}", exceptionMessage);
-                throw new UserAlreadyExistsException("Пользователь уже добавлен");
+                throw new EntityAlreadyExistsException("Пользователь уже добавлен");
             }
+            System.out.println(user);
             user.setId(generateUserId());
             users.put(user.getId(), user);
             return user;
@@ -47,64 +48,60 @@ public class UserController {
         return null;
     }
 
-    @PutMapping()
-    public User updateUser(@RequestBody User user){
-        if(validateUser(user)){
+    @PutMapping
+    public User updateUser(@RequestBody @Valid User user) {
+        if (validateUser(user)) {
 
             log.info("Получен запрос 'PUT /users'");
-            if(!users.containsKey(user.getId())) {
+            if (!users.containsKey(user.getId())) {
                 String exceptionMessage = "Обновляемый пользователь не существует";
                 log.warn("Ошибка при обновлении пользователя. Сообщение исключения: {}", exceptionMessage);
-                throw new UserDoesNotExistException(exceptionMessage);
+                throw new EntityDoesNotExistException(exceptionMessage);
             }
-
-            users.remove(user.getId(),user);
-            users.put(user.getId(),user);
+            users.remove(user.getId(), user);
+            users.put(user.getId(), user);
             return user;
         }
         return null;
     }
 
     @GetMapping
-    public List<User> getAll(){
+    public List<User> getAll() {
 
         log.info("Получен запрос 'GET /users'");
         return new ArrayList<>(users.values());
     }
 
+    public boolean validateUser(User user) {
 
-
-    public boolean validateUser(User user){
-
-        if(user.getEmail() == null || user.getEmail().isEmpty()){
+        if (StringValidator.isNullOrEmpty(user.getEmail())) {
             String exceptionMessage = "Email пользователя не может быть"
                     + " не задан или быть пустой строкой";
             log.warn("Ошибка при валидации пользователя. Сообщение исключения: {}", exceptionMessage);
-            throw new UserEmailNullOrEmptyException(exceptionMessage);
+            throw new UserValidationException(exceptionMessage);
         }
 
-        if(!user.getEmail().contains("@")){
+        if (!user.getEmail().contains("@")) {
             String exceptionMessage = "Email пользователя должен содержать '@'";
             log.warn("Ошибка при валидации пользователя. Сообщение исключения: {}", exceptionMessage);
-            throw new UserEmailIsIncorrectException(exceptionMessage);
+            throw new UserValidationException(exceptionMessage);
         }
 
-        if(user.getLogin().isEmpty() || user.getLogin().contains(" ")){
+        if (StringValidator.isEmptyOrContainsSpaceSymbol(user.getLogin())) {
             String exceptionMessage = "Логин пользователя не должен быть пустым" +
                     "и содержать пробелы";
             log.warn("Ошибка при валидации пользователя. Сообщение исключения: {}", exceptionMessage);
-            throw new UserLoginIsEmptyOrBlankException("Логин пользователя не должен быть пустым" +
-                    "и содержать пробелы");
+            throw new UserValidationException(exceptionMessage);
         }
 
-        if(user.getName() == null || user.getName().isEmpty()){
+        if (StringValidator.isNullOrEmpty(user.getName())) {
             user.setName(user.getLogin());
         }
 
-        if(user.getBirthday().isAfter(LocalDate.now())){
+        if (LocalDateValidator.isDateInTheFuture(user.getBirthday())) {
             String exceptionMessage = "Пользователь не может быть рождён в будущем";
             log.warn("Ошибка при валидации пользователя. Сообщение исключения: {}", exceptionMessage);
-            throw new UserBirthdayException(exceptionMessage);
+            throw new UserValidationException(exceptionMessage);
         }
         return true;
     }

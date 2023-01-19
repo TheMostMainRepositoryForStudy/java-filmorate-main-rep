@@ -1,14 +1,21 @@
 package ru.yandex.practicum.javafilmorate.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.javafilmorate.exceptions.UserBirthdayException;
-import ru.yandex.practicum.javafilmorate.exceptions.UserEmailIsIncorrectException;
-import ru.yandex.practicum.javafilmorate.exceptions.UserEmailNullOrEmptyException;
-import ru.yandex.practicum.javafilmorate.exceptions.UserLoginIsEmptyOrBlankException;
+import org.springframework.context.ConfigurableApplicationContext;
+import ru.yandex.practicum.javafilmorate.JavaFilmorateApplication;
 import ru.yandex.practicum.javafilmorate.model.User;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,7 +23,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class UserControllerTest {
 
-    public static UserController userController;
+    private static ConfigurableApplicationContext app;
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .findAndRegisterModules()
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+    private static final int PORT = 8080;
 
     private static User userWithoutEmail;
 
@@ -29,15 +41,16 @@ class UserControllerTest {
     private static User userWithBirthdayInTheFuture;
 
     @BeforeAll
-    static void beforeAll(){
+    static void beforeAll() {
 
-        userController = new UserController();
+        app = SpringApplication.run(JavaFilmorateApplication.class);
 
         userWithoutEmail = User.builder()
                 .id(1)
+                .email(null)
                 .login("TestLogin")
                 .name("TestName")
-                .birthday(LocalDate.of(1993,2,28))
+                .birthday(LocalDate.of(1993, 2, 28))
                 .build();
 
         userWithIncorrectEmail = User.builder()
@@ -45,7 +58,7 @@ class UserControllerTest {
                 .email("Test.mail")
                 .login("TestLogin")
                 .name("TestName")
-                .birthday(LocalDate.of(1993,2,28))
+                .birthday(LocalDate.of(1993, 2, 28))
                 .build();
 
         userWithEmptyLogin = User.builder()
@@ -53,7 +66,7 @@ class UserControllerTest {
                 .email("Test@mail.com")
                 .login("")
                 .name("TestName")
-                .birthday(LocalDate.of(1993,2,28))
+                .birthday(LocalDate.of(1993, 2, 28))
                 .build();
 
         userWithBlankInLogin = User.builder()
@@ -61,7 +74,7 @@ class UserControllerTest {
                 .email("Test@mail.com")
                 .login("Test Login")
                 .name("TestName")
-                .birthday(LocalDate.of(1993,2,28))
+                .birthday(LocalDate.of(1993, 2, 28))
                 .build();
 
         userWithBirthdayInTheFuture = User.builder()
@@ -69,67 +82,105 @@ class UserControllerTest {
                 .email("Test@mail.com")
                 .login("TestLogin")
                 .name("TestName")
-                .birthday(LocalDate.of(2100,2,28))
+                .birthday(LocalDate.of(2100, 2, 28))
                 .build();
     }
 
-    @Test
-    public void shouldReturnUserEmailNullOrEmptyException(){
-
-        UserEmailNullOrEmptyException ex =
-                assertThrows(UserEmailNullOrEmptyException.class,
-                        () -> userController.validateUser(userWithoutEmail));
-
-        String exceptionMessage = "Email пользователя не может быть"
-                + " не задан или быть пустой строкой";
-        assertEquals(exceptionMessage, ex.getMessage());
+    @AfterAll
+    static void afterAll(){
+        app.close();
     }
 
     @Test
-    public void shouldReturnUserEmailIsIncorrectException(){
+    public void shouldReturnUserEmailNullOrEmptyException() throws IOException, InterruptedException {
 
-        UserEmailIsIncorrectException ex =
-                assertThrows(UserEmailIsIncorrectException.class,
-                        () -> userController.validateUser(userWithIncorrectEmail));
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:" + PORT + "/users");
+        String requestBody = objectMapper.writeValueAsString(userWithoutEmail);
 
-        String exceptionMessage = "Email пользователя должен содержать '@'";
-        assertEquals(exceptionMessage, ex.getMessage());
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest
+                        .BodyPublishers
+                        .ofString(requestBody))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(400, response.statusCode());
     }
 
     @Test
-    public void shouldReturnUserLoginIsEmptyOrBlankException(){
+    public void shouldReturnUserEmailIsIncorrectException() throws IOException, InterruptedException {
 
-        UserLoginIsEmptyOrBlankException ex =
-                assertThrows(UserLoginIsEmptyOrBlankException.class,
-                        () -> userController.validateUser(userWithEmptyLogin));
 
-        String exceptionMessage = "Логин пользователя не должен быть пустым" +
-                                  "и содержать пробелы";
-        assertEquals(exceptionMessage, ex.getMessage());
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:" + PORT + "/users");
+        String requestBody = objectMapper.writeValueAsString(userWithIncorrectEmail);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest
+                        .BodyPublishers
+                        .ofString(requestBody))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(400, response.statusCode());
     }
 
     @Test
-    public void shouldReturnUserLoginIsEmptyOrBlankExceptionBecauseOfBlank(){
+    public void shouldReturnUserLoginIsEmptyOrBlankException() throws IOException, InterruptedException {
 
-        UserLoginIsEmptyOrBlankException ex =
-                assertThrows(UserLoginIsEmptyOrBlankException.class,
-                        () -> userController.validateUser(userWithBlankInLogin));
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:" + PORT + "/users");
+        String requestBody = objectMapper.writeValueAsString(userWithEmptyLogin);
 
-        String exceptionMessage = "Логин пользователя не должен быть пустым" +
-                "и содержать пробелы";
-        assertEquals(exceptionMessage, ex.getMessage());
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest
+                        .BodyPublishers
+                        .ofString(requestBody))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(500, response.statusCode());
+
     }
 
+    @Test
+    public void shouldReturnUserLoginIsEmptyOrBlankExceptionBecauseOfBlank() throws IOException, InterruptedException {
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:" + PORT + "/users");
+        String requestBody = objectMapper.writeValueAsString(userWithBlankInLogin);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest
+                        .BodyPublishers
+                        .ofString(requestBody))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(500, response.statusCode());
+    }
 
     @Test
-    public void shouldReturnUserBirthdayException(){
+    public void shouldReturnUserBirthdayException() throws IOException, InterruptedException {
 
-        UserBirthdayException ex =
-                assertThrows(UserBirthdayException.class,
-                        () -> userController.validateUser(userWithBirthdayInTheFuture));
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:" + PORT + "/users");
+        String requestBody = objectMapper.writeValueAsString(userWithBirthdayInTheFuture);
 
-        String exceptionMessage = "Пользователь не может быть рождён в будущем";
-        assertEquals(exceptionMessage, ex.getMessage());
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest
+                        .BodyPublishers
+                        .ofString(requestBody))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(400, response.statusCode());
     }
 
 }

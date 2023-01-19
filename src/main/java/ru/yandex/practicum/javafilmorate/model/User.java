@@ -3,6 +3,7 @@ package ru.yandex.practicum.javafilmorate.model;
 import lombok.*;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ public class User {
     @EqualsAndHashCode.Exclude
     private int id;
     @NotNull(message = "Email не может быть не задан")
+    @NotBlank(message = "Email не может быть пустым")
     @Email(message = "Email должен быть корректным")
     private String email;
     private String login;
