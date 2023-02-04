@@ -87,7 +87,7 @@ class UserControllerTest {
     }
 
     @AfterAll
-    static void afterAll(){
+    static void afterAll() {
         app.close();
     }
 

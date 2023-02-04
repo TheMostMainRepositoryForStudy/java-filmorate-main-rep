@@ -77,7 +77,7 @@ class FilmControllerTest {
     }
 
     @AfterAll
-    static void afterAll(){
+    static void afterAll() {
         app.close();
     }
 

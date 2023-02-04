@@ -1,7 +1,7 @@
 package ru.yandex.practicum.javafilmorate.service;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityAlreadyExistsException;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityDoesNotExistException;
@@ -15,14 +15,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserStorage userStorage;
-
-    @Autowired
-    public UserService(UserStorage userStorage){
-        this.userStorage = userStorage;
-    }
 
     public User addNewUserToStorage(User user) {
         return userStorage.addUser(user);
@@ -32,95 +28,83 @@ public class UserService {
         return userStorage.getAllUsers();
     }
 
-    public User updateUserInStorage( User user) {
+    public User updateUserInStorage(User user) {
         return userStorage.updateUser(user);
     }
 
-    public UserStorage getUserStorage() {
-        return userStorage;
-    }
-
-    public boolean doesUserExistInStorage(long id){
+    public boolean doesUserExistInStorage(long id) {
         return userStorage.doesUserExist(id);
     }
 
-    public User getUserFromStorage(long id){
+    public User getUserFromStorage(long id) {
         return userStorage.getUser(id);
     }
 
-    public void addUsersToFriendsInStorage(long id, long friendId){
+    public void addUsersToFriendsInStorage(long id, long friendId) {
         User user = userStorage.getUser(id);
-        if(user.getFriends() == null){
+        if (user.getFriends() == null) {
             user.setFriends(new HashSet<>());
         }
 
-        if(!user.getFriends().add(friendId)){
+        if (!user.getFriends().add(friendId)) {
             throw new EntityAlreadyExistsException("Пользователи уже в друзьях друг у друга");
         }
 
         User friend = userStorage.getUser(friendId);
 
-        if(friend.getFriends() == null){
+        if (friend.getFriends() == null) {
             friend.setFriends(new HashSet<>());
         }
 
         friend.getFriends().add(id);
     }
 
-    public void deleteUsersFromFriendsInStorage(long id, long friendId){
+    public void deleteUsersFromFriendsInStorage(long id, long friendId) {
         User user = userStorage.getUser(id);
-        if(user.getFriends() == null){
+        if (user.getFriends() == null) {
             user.setFriends(new HashSet<>());
         }
 
-        if(!user.getFriends().remove(friendId)){
+        if (!user.getFriends().remove(friendId)) {
             throw new EntityDoesNotExistException("Пользователи не в друзьях друг у друга. Удаление невозможно");
         }
 
         User friend = userStorage.getUser(friendId);
 
-        if(friend.getFriends() == null){
+        if (friend.getFriends() == null) {
             friend.setFriends(new HashSet<>());
         }
 
         friend.getFriends().remove(id);
     }
 
-    public List<User> getUserFriendsFromStorage(long id){
+    public List<User> getUserFriendsFromStorage(long id) {
 
         Set<Long> userFriends = userStorage.getUser(id).getFriends();
 
-        if(userFriends == null){
+        if (userFriends == null) {
             return new ArrayList<>();
         }
 
-        List<User> result = new ArrayList<>();
-
-        for(long idUser : userFriends){
-            result.add(userStorage.getUser(idUser));
-        }
-
-        return result;
+        return userFriends.stream()
+                .map(userStorage::getUser)
+                .collect(Collectors.toList());
     }
 
-    public List<User> getUsersCommonFriendsFromStorage(long id, long otherId){
+    public List<User> getUsersCommonFriendsFromStorage(long id, long otherId) {
 
         Set<Long> userFriends = userStorage.getUser(id).getFriends();
 
-        if(userFriends == null){
+        if (userFriends == null) {
             return new ArrayList<>();
         }
 
         Set<Long> friendsFriends = userStorage.getUser(otherId).getFriends();
 
-        List<Long> commonFriends = userFriends.stream().filter(friendsFriends::contains).collect(Collectors.toList());
-
-        List<User> result = new ArrayList<>();
-
-        for(long idUser : commonFriends){
-            result.add(userStorage.getUser(idUser));
-        }
-
-        return result;
+        return userFriends
+                .stream()
+                .filter(friendsFriends::contains)
+                .map(userStorage::getUser)
+                .collect(Collectors.toList());
     }
 }

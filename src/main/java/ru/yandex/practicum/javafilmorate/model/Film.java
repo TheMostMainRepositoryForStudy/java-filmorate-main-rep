@@ -1,6 +1,8 @@
 package ru.yandex.practicum.javafilmorate.model;
 
 import lombok.*;
+import ru.yandex.practicum.javafilmorate.util.DurationPositiveOrZero;
+import ru.yandex.practicum.javafilmorate.util.FilmDate;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -23,7 +25,9 @@ public class Film {
     private String name;
     @Size(max = 200, message = "Длина описания не должна превышать 200 символов")
     private String description;
+    @FilmDate
     private LocalDate releaseDate;
+    @DurationPositiveOrZero
     private Duration duration;
     private Set<Long> likes;
     private int likesAmount;

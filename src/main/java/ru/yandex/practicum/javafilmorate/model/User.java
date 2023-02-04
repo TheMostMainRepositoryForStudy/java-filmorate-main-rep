@@ -1,6 +1,7 @@
 package ru.yandex.practicum.javafilmorate.model;
 
 import lombok.*;
+import ru.yandex.practicum.javafilmorate.util.StringWithoutSpaceSymbol;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -21,6 +22,9 @@ public class User {
     @NotBlank(message = "Email не может быть пустым")
     @Email(message = "Email должен быть корректным")
     private String email;
+    @NotNull(message = "Логин не может быть не задан")
+    @NotBlank(message = "Логин не может быть пустым")
+    @StringWithoutSpaceSymbol
     private String login;
     private String name;
     @Past(message = "День рождения не может быть в будущем")
