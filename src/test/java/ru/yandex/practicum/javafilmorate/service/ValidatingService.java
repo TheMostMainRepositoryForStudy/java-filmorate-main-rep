@@ -6,11 +6,11 @@ import javax.validation.*;
 import java.util.Set;
 
 @Service
-public class ValidatingServiceForTesting {
+public class ValidatingService {
 
     private final Validator validator;
 
-    ValidatingServiceForTesting() {
+    ValidatingService() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         this.validator = factory.getValidator();
     }

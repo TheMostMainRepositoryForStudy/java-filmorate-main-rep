@@ -2,7 +2,6 @@ package ru.yandex.practicum.javafilmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.javafilmorate.exceptions.*;
 import ru.yandex.practicum.javafilmorate.model.Film;
 import ru.yandex.practicum.javafilmorate.service.FilmService;
 
@@ -35,14 +34,12 @@ public class FilmController {
     @PutMapping("/{id}/like/{userId}")
     public void likeFilm(@PathVariable long id, @PathVariable long userId) {
         log.info(String.format("Получен запрос 'PUT /films/%d/like/%d'", id, userId));
-        checkFilmExistence(id);
         filmService.likeFilmInStorage(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLikeFromFilm(@PathVariable long id, @PathVariable long userId) {
         log.info(String.format("Получен запрос 'DELETE /films/%d/like/%d'", id, userId));
-        checkFilmExistence(id);
         filmService.deleteLikeFilmInStorage(id, userId);
     }
 
@@ -50,7 +47,6 @@ public class FilmController {
     @GetMapping("/{id}")
     public Film getFilm(@PathVariable long id) {
         log.info(String.format("Получен запрос 'GET /films/%d'", id));
-        checkFilmExistence(id);
         return filmService.getFilmFromStorage(id);
     }
 
@@ -64,22 +60,5 @@ public class FilmController {
     public List<Film> getMostLikedFilms(@RequestParam(defaultValue = "10") long count) {
         log.info(String.format("Получен запрос 'GET /films/popular?count=%d'", count));
         return filmService.getMostLikedFilmsFromStorage(count);
-    }
-
-    private void checkFilmExistence(long id) {
-
-        if (id < 1) {
-            String exceptionMessage = String.format("Фильм с id = %d не может существовать", id);
-            log.warn("Ошибка при запросе фильма. Сообщение исключения: {}",
-                    exceptionMessage);
-            throw new InvalidPathVariableOrParameterException("id", exceptionMessage);
-        }
-
-        if (!filmService.doesFilmExistInStorage(id)) {
-            String exceptionMessage = String.format("Фильм с  id = %d не существует", id);
-            log.warn("Ошибка при запросе фильма. Сообщение исключения: {}",
-                    exceptionMessage);
-            throw new EntityDoesNotExistException(exceptionMessage);
-        }
     }
 }

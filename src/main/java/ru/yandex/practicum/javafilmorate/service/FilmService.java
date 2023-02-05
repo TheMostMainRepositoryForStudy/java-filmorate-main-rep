@@ -1,9 +1,11 @@
 package ru.yandex.practicum.javafilmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityAlreadyExistsException;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityDoesNotExistException;
+import ru.yandex.practicum.javafilmorate.exceptions.InvalidPathVariableOrParameterException;
 import ru.yandex.practicum.javafilmorate.model.Film;
 import ru.yandex.practicum.javafilmorate.storage.FilmStorage;
 import ru.yandex.practicum.javafilmorate.storage.UserStorage;
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FilmService {
 
     private final FilmStorage filmStorage;
@@ -37,10 +40,12 @@ public class FilmService {
     }
 
     public Film getFilmFromStorage(long id) {
+        checkFilmExistence(id);
         return filmStorage.getFilm(id);
     }
 
     public void likeFilmInStorage(long id, long userId) {
+        checkFilmExistence(id);
         Film film = filmStorage.getFilm(id);
         if (film.getLikes() == null) {
             film.setLikes(new HashSet<>());
@@ -62,6 +67,7 @@ public class FilmService {
     }
 
     public void deleteLikeFilmInStorage(long id, long userId) {
+        checkFilmExistence(id);
         Film film = filmStorage.getFilm(id);
         if (film.getLikes() == null) {
             film.setLikes(new HashSet<>());
@@ -92,5 +98,22 @@ public class FilmService {
                 .sorted((o1, o2) -> o2.getLikesAmount() - o1.getLikesAmount())
                 .limit(count)
                 .collect(Collectors.toList());
+    }
+
+    private void checkFilmExistence(long id) {
+
+        if (id < 1) {
+            String exceptionMessage = String.format("Фильм с id = %d не может существовать", id);
+            log.warn("Ошибка при запросе фильма. Сообщение исключения: {}",
+                    exceptionMessage);
+            throw new InvalidPathVariableOrParameterException("id", exceptionMessage);
+        }
+
+        if (!doesFilmExistInStorage(id)) {
+            String exceptionMessage = String.format("Фильм с  id = %d не существует", id);
+            log.warn("Ошибка при запросе фильма. Сообщение исключения: {}",
+                    exceptionMessage);
+            throw new EntityDoesNotExistException(exceptionMessage);
+        }
     }
 }
