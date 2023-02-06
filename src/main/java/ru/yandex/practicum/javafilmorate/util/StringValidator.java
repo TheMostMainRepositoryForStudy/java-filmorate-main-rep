@@ -1,20 +1,17 @@
 package ru.yandex.practicum.javafilmorate.util;
 
-public final class StringValidator {
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
-    public static boolean isLengthBiggerThanMaxLength(String stringToValidate, int maxLength) {
-
-        return stringToValidate.length() > maxLength;
-    }
+public final class StringValidator implements ConstraintValidator<StringWithoutSpaceSymbol, String> {
 
     public static boolean isNullOrEmpty(String stringToValidate) {
 
         return stringToValidate == null || stringToValidate.isEmpty();
     }
 
-    public static boolean isEmptyOrContainsSpaceSymbol(String stringToValidate) {
-
-        return stringToValidate.isEmpty() || stringToValidate.contains(" ");
+    @Override
+    public boolean isValid(String login, ConstraintValidatorContext constraintValidatorContext) {
+        return !login.contains(" ");
     }
-
 }

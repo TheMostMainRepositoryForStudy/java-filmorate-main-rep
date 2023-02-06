@@ -2,14 +2,10 @@ package ru.yandex.practicum.javafilmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.javafilmorate.exceptions.*;
 import ru.yandex.practicum.javafilmorate.model.Film;
-import ru.yandex.practicum.javafilmorate.util.DurationValidator;
-import ru.yandex.practicum.javafilmorate.util.LocalDateValidator;
-import ru.yandex.practicum.javafilmorate.util.StringValidator;
+import ru.yandex.practicum.javafilmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.*;
 
 @RestController
@@ -17,92 +13,52 @@ import java.util.*;
 @Slf4j
 public class FilmController {
 
-    private final static int MAX_DESCRIPTION_LENGTH = 200;
-    private final static LocalDate THE_OLDEST_RELEASE_DATE = LocalDate.of(1895, 12, 28);
-    private int idToNewFilm = 1;
-    private final HashMap<Integer, Film> films = new HashMap<>();
+    private final FilmService filmService;
 
-    private int generateFilmId() {
-        int idToSet = idToNewFilm;
-        idToNewFilm++;
-        return idToSet;
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
     }
 
     @PostMapping
-    public Film addNewFilm(@RequestBody @Valid Film film) {
-        log.info("Получен запрос POST /films");
-        System.out.println(film);
-        if (validateFilm(film)) {
-            // Проверяю, что в коллекции нет фильма с такими же названием,
-            // описанием, датой релиза и длительностью
-            if (films.containsValue(film)) {
-                String exceptionMessage = "Фильм уже добавлен в библиотеку";
-                log.warn("Ошибка при добавлении нового фильма. Сообщение исключения: {}",
-                        exceptionMessage);
-                throw new EntityAlreadyExistsException(exceptionMessage);
-            }
-
-            film.setId(generateFilmId());
-            films.put(film.getId(), film);
-            return film;
-
-        }
-
-        return null;
+    public Film add(@RequestBody @Valid Film film) {
+        log.info("Получен запрос 'POST /films'");
+        return filmService.addNewFilmToStorage(film);
     }
 
     @PutMapping
-    public Film updateFilm(@RequestBody @Valid Film film) {
-        if (validateFilm(film)) {
+    public Film update(@RequestBody @Valid Film film) {
+        log.info("Получен запрос 'PUT /films'");
+        return filmService.updateFilmInStorage(film);
+    }
 
-            if (!films.containsKey(film.getId())) {
-                String exceptionMessage = "Обновляемый фильм не существует";
-                log.warn("Ошибка при обновлении существующего фильма. Сообщение исключения: {}", exceptionMessage);
-                throw new EntityDoesNotExistException(exceptionMessage);
-            }
+    @PutMapping("/{id}/like/{userId}")
+    public void likeFilm(@PathVariable long id, @PathVariable long userId) {
+        log.info(String.format("Получен запрос 'PUT /films/%d/like/%d'", id, userId));
+        filmService.likeFilmInStorage(id, userId);
+    }
 
-            films.remove(film.getId(), film);
-            films.put(film.getId(), film);
-            return film;
-        }
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteLikeFromFilm(@PathVariable long id, @PathVariable long userId) {
+        log.info(String.format("Получен запрос 'DELETE /films/%d/like/%d'", id, userId));
+        filmService.deleteLikeFilmInStorage(id, userId);
+    }
 
-        return null;
+
+    @GetMapping("/{id}")
+    public Film getFilm(@PathVariable long id) {
+        log.info(String.format("Получен запрос 'GET /films/%d'", id));
+        return filmService.getFilmFromStorage(id);
     }
 
     @GetMapping
     public List<Film> getAll() {
-
-        return new ArrayList<>(films.values());
+        log.info("Получен запрос 'GET /films'");
+        return filmService.getAllFilmsFromStorage();
     }
 
-    public boolean validateFilm(Film film) {
-
-        if (StringValidator.isNullOrEmpty(film.getName())) {
-            String exceptionMessage = "Имя фильма не может быть "
-                    + " не задано или пустой строкой";
-            log.warn("Ошибка при валидации фильма. Сообщение исключения: {}", exceptionMessage);
-            throw new FilmValidationException(exceptionMessage);
-        }
-
-        if (StringValidator.isLengthBiggerThanMaxLength(film.getDescription(), MAX_DESCRIPTION_LENGTH)) {
-            String exceptionMessage = "Длина описания больше " + MAX_DESCRIPTION_LENGTH + " символов";
-            log.warn("Ошибка при валидации фильма. Сообщение исключения: {}", exceptionMessage);
-            throw new FilmValidationException(exceptionMessage);
-        }
-
-        if (LocalDateValidator.isDateTooOld(film.getReleaseDate(), THE_OLDEST_RELEASE_DATE)) {
-            String exceptionMessage = "Слишком старая дата релиза."
-                    + " Можно добавить фильмы с датой релиза после 28.12.1895";
-            log.warn("Ошибка при валидации фильма. Сообщение исключения: {}", exceptionMessage);
-            throw new FilmValidationException(exceptionMessage);
-        }
-
-        if (DurationValidator.isDurationNegativeOrZero(film.getDuration())) {
-            String exceptionMessage = "Длительность фильма должна быть больше 0 сек.";
-            log.warn("Ошибка при валидации фильма. Сообщение исключения: {}", exceptionMessage);
-            throw new FilmValidationException(exceptionMessage);
-        }
-
-        return true;
+    @GetMapping("/popular")
+    public List<Film> getMostLikedFilms(@RequestParam(defaultValue = "10") long count) {
+        log.info(String.format("Получен запрос 'GET /films/popular?count=%d'", count));
+        return filmService.getMostLikedFilmsFromStorage(count);
     }
 }
