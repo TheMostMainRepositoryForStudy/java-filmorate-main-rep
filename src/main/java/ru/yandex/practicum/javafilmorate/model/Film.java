@@ -1,6 +1,7 @@
 package ru.yandex.practicum.javafilmorate.model;
 
 import lombok.*;
+import ru.yandex.practicum.javafilmorate.enums.RatingMPA;
 import ru.yandex.practicum.javafilmorate.util.DurationPositiveOrZero;
 import ru.yandex.practicum.javafilmorate.util.FilmDate;
 
@@ -9,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Set;
 
 @Getter
@@ -31,4 +33,6 @@ public class Film {
     private Duration duration;
     private Set<Long> likes;
     private int likesAmount;
+    private HashMap<Long, Boolean> friends;
+    private RatingMPA rating;
 }
