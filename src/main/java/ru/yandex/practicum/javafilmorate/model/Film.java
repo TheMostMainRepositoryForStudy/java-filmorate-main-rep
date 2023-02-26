@@ -11,6 +11,7 @@ import javax.validation.constraints.Size;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -35,4 +36,26 @@ public class Film {
     private int likesAmount;
     private HashMap<Long, Boolean> friends;
     private RatingMPA rating;
+    private List<RatingMPA> listMpa;
+    private Mpa mpa;
+    private HashMap<String, Integer> hashMpa;
+
+    public Film() {
+
+    }
+
+    public Film(long id, String name, String description, LocalDate releaseDate, Duration duration, Set<Long> likes, int likesAmount, HashMap<Long, Boolean> friends, RatingMPA rating, List<RatingMPA> listMpa, Mpa mpa, HashMap<String, Integer> hashMpa) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.likes = likes;
+        this.likesAmount = likesAmount;
+        this.friends = friends;
+        this.rating = rating;
+        this.listMpa = listMpa;
+        this.mpa = mpa;
+        this.hashMpa = hashMpa;
+    }
 }

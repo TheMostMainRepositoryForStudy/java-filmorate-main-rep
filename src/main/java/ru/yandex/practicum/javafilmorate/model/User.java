@@ -30,4 +30,5 @@ public class User {
     @Past(message = "День рождения не может быть в будущем")
     private LocalDate birthday;
     private Set<Long> friends;
+
 }
