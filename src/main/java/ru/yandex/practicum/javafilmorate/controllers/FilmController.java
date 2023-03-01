@@ -14,6 +14,8 @@ import java.util.*;
 public class FilmController {
 
     private final FilmService filmService;
+    private long film_id;
+    private long user_id;
 
     public FilmController(FilmService filmService) {
         this.filmService = filmService;
@@ -61,4 +63,5 @@ public class FilmController {
         log.info(String.format("Получен запрос 'GET /films/popular?count=%d'", count));
         return filmService.getMostLikedFilmsFromStorage(count);
     }
+
 }

@@ -8,6 +8,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -30,5 +32,7 @@ public class User {
     @Past(message = "День рождения не может быть в будущем")
     private LocalDate birthday;
     private Set<Long> friends;
+    private List<User> listFriends;
+
 
 }

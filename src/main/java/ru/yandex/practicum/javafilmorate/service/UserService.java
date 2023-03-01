@@ -1,9 +1,10 @@
 package ru.yandex.practicum.javafilmorate.service;
 
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.javafilmorate.dao.UserDbStorageDao;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityAlreadyExistsException;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityDoesNotExistException;
 import ru.yandex.practicum.javafilmorate.exceptions.InvalidPathVariableOrParameterException;
@@ -18,11 +19,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class UserService {
 
     private final UserStorage userStorage;
+
+    public UserService(@Qualifier("userStorageDb")UserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
 
     public User addNewUserToStorage(User user) {
         setUserNameIfNeeded(user);
@@ -42,7 +46,6 @@ public class UserService {
     }
 
     public User getUserFromStorage(long id) {
-        checkUserExistence(id);
         return userStorage.getUser(id);
     }
 

@@ -1,25 +1,25 @@
 package ru.yandex.practicum.javafilmorate.model;
 
 import lombok.*;
-import ru.yandex.practicum.javafilmorate.enums.RatingMPA;
 import ru.yandex.practicum.javafilmorate.util.DurationPositiveOrZero;
 import ru.yandex.practicum.javafilmorate.util.FilmDate;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode
 @Builder
-public class Film {
+public class Film implements Serializable {
 
     @EqualsAndHashCode.Exclude
     private long id;
@@ -32,30 +32,43 @@ public class Film {
     private LocalDate releaseDate;
     @DurationPositiveOrZero
     private Duration duration;
-    private Set<Long> likes;
-    private int likesAmount;
-    private HashMap<Long, Boolean> friends;
-    private RatingMPA rating;
-    private List<RatingMPA> listMpa;
+    private List<User> likes;
+    private int rate;
     private Mpa mpa;
-    private HashMap<String, Integer> hashMpa;
+
+    private List<Genre> genres;
 
     public Film() {
 
     }
 
-    public Film(long id, String name, String description, LocalDate releaseDate, Duration duration, Set<Long> likes, int likesAmount, HashMap<Long, Boolean> friends, RatingMPA rating, List<RatingMPA> listMpa, Mpa mpa, HashMap<String, Integer> hashMpa) {
+    public Film(long id,
+                String name,
+                String description,
+                LocalDate releaseDate,
+                Duration duration,
+                List<User> likes,
+                int rate,
+                Mpa mpa,
+                List<Genre> genres) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.likes = likes;
-        this.likesAmount = likesAmount;
-        this.friends = friends;
-        this.rating = rating;
-        this.listMpa = listMpa;
+        this.rate = rate;
         this.mpa = mpa;
-        this.hashMpa = hashMpa;
+        this.genres = genres;
+    }
+
+    public Map<String, Object> toMap(){
+        Map<String,Object> values = new HashMap<>();
+        values.put("name", name);
+        values.put("description", description);
+        values.put("release_date", releaseDate);
+        values.put("duration", duration);
+        values.put("mpa", mpa);
+        return values;
     }
 }
