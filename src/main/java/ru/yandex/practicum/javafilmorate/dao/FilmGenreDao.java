@@ -1,26 +1,23 @@
 package ru.yandex.practicum.javafilmorate.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.javafilmorate.model.Film;
 import ru.yandex.practicum.javafilmorate.model.Genre;
 
-import java.util.List;
-
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.*;
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class FilmGenreDao {
 
-    @Autowired
     private final JdbcTemplate jdbcTemplate;
     private final GenreDao genreDao;
-
-
-    public FilmGenreDao(JdbcTemplate jdbcTemplate, GenreDao genreDao) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.genreDao = genreDao;
-    }
 
     public List<Genre> getFilmGenre(long id){
         String sql = "SELECT g.id, g.name " +
@@ -29,4 +26,33 @@ public class FilmGenreDao {
                      "WHERE fg.film_id = ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> genreDao.makeGenre(rs), id);
     }
+    public Film insertFilmGenre(Film film ){
+
+        String sql = "INSERT INTO FILM_GENRE(FILM_ID,GENRE_ID)  " +
+                     "VALUES(?,?)";
+
+        ArrayList<Genre> genres = new ArrayList(new HashSet<>(film.getGenres()));
+        genres.sort(Comparator.comparing(Genre::getId));
+        jdbcTemplate.batchUpdate(sql,
+                new BatchPreparedStatementSetter() {
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setLong(1, film.getId());
+                        ps.setLong(2, genres.get(i).getId());
+                    }
+                    public int getBatchSize() {
+                        return genres.size();
+                    }
+                });
+        film.setGenres(genres);
+
+        return film;
+    }
+
+    public void deleteAllFilmGenresByFilmId(long filmId ){
+
+        String sql = "DELETE FROM FILM_GENRE " +
+                      "WHERE film_id = ?";
+        jdbcTemplate.update(sql,filmId);
+    }
+
 }

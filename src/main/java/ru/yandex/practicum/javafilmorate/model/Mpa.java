@@ -1,9 +1,6 @@
 package ru.yandex.practicum.javafilmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.*;
-
-import java.io.Serializable;
 
 @Getter
 @Setter

@@ -7,10 +7,10 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -31,8 +31,21 @@ public class User {
     private String name;
     @Past(message = "День рождения не может быть в будущем")
     private LocalDate birthday;
-    private Set<Long> friends;
-    private List<User> listFriends;
+    private List<User> friends;
 
+    public static User makeUser(ResultSet rs) throws SQLException {
+        long id = rs.getLong("id");
+        String email = rs.getString("email");
+        String login = rs.getString("login");
+        String name = rs.getString("name");
+        LocalDate birthday =  rs.getDate("birthday").toLocalDate();
 
+        return User.builder()
+                .id(id)
+                .email(email)
+                .login(login)
+                .name(name)
+                .birthday(birthday)
+                .build();
+    }
 }

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -90,5 +91,16 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public boolean doesFilmExist(long id) {
         return films.containsKey(id);
+    }
+    public List<Film> getMostLikedFilms(int limit){
+        if (this.getAllFilms().isEmpty()) {
+            return this.getAllFilms();
+        }
+
+        return this.getAllFilms()
+                .stream()
+                .sorted((o1, o2) -> o2.getRate() - o1.getRate())
+                .limit(limit)
+                .collect(Collectors.toList());
     }
 }

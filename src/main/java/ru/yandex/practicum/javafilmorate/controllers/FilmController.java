@@ -14,8 +14,7 @@ import java.util.*;
 public class FilmController {
 
     private final FilmService filmService;
-    private long film_id;
-    private long user_id;
+
 
     public FilmController(FilmService filmService) {
         this.filmService = filmService;
@@ -45,7 +44,6 @@ public class FilmController {
         filmService.deleteLikeFilmInStorage(id, userId);
     }
 
-
     @GetMapping("/{id}")
     public Film getFilm(@PathVariable long id) {
         log.info(String.format("Получен запрос 'GET /films/%d'", id));
@@ -59,7 +57,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getMostLikedFilms(@RequestParam(defaultValue = "10") long count) {
+    public List<Film> getMostLikedFilms(@RequestParam(defaultValue = "10") int count) {
         log.info(String.format("Получен запрос 'GET /films/popular?count=%d'", count));
         return filmService.getMostLikedFilmsFromStorage(count);
     }

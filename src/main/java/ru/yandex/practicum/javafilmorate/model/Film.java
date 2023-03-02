@@ -1,6 +1,7 @@
 package ru.yandex.practicum.javafilmorate.model;
 
 import lombok.*;
+
 import ru.yandex.practicum.javafilmorate.util.DurationPositiveOrZero;
 import ru.yandex.practicum.javafilmorate.util.FilmDate;
 
@@ -10,9 +11,7 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Getter
 @Setter
@@ -60,15 +59,5 @@ public class Film implements Serializable {
         this.rate = rate;
         this.mpa = mpa;
         this.genres = genres;
-    }
-
-    public Map<String, Object> toMap(){
-        Map<String,Object> values = new HashMap<>();
-        values.put("name", name);
-        values.put("description", description);
-        values.put("release_date", releaseDate);
-        values.put("duration", duration);
-        values.put("mpa", mpa);
-        return values;
     }
 }

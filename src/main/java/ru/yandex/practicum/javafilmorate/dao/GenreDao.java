@@ -1,12 +1,12 @@
 package ru.yandex.practicum.javafilmorate.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityDoesNotExistException;
 import ru.yandex.practicum.javafilmorate.model.Genre;
-import ru.yandex.practicum.javafilmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,13 +14,10 @@ import java.util.List;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class GenreDao {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public GenreDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     public List<Genre> getAll(){
         String sql = "SELECT id, name " +
@@ -35,9 +32,7 @@ public class GenreDao {
                      "WHERE id = ?";
 
         try{    Genre mpa = jdbcTemplate.queryForObject(sql,
-                (ResultSet rs, int rowNum) -> {
-                    return makeGenre(rs);
-                },
+                (ResultSet rs, int rowNum) -> makeGenre(rs),
                 id);
                 log.info("Найден Жанр: c id = {} названием = {}", mpa.getId(), mpa.getName());
                 return mpa;
@@ -47,7 +42,6 @@ public class GenreDao {
                                                 "Жанр с идентификатором %d не найден.", id));
         }
     }
-
 
     public Genre makeGenre(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");

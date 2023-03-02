@@ -1,7 +1,7 @@
 package ru.yandex.practicum.javafilmorate.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,46 +24,41 @@ import java.util.List;
 @Slf4j
 @Component
 @Qualifier("filmStorageDb")
+@RequiredArgsConstructor
 public class FilmDbStorageDao implements FilmStorage {
 
-    @Autowired
+
     private final JdbcTemplate jdbcTemplate;
-    @Autowired
+
     private final FilmGenreDao filmGenreDao;
-    @Autowired
+
     private final LikeDao likeDao;
 
-    @Autowired
     private final MpaDao mpaDao;
-
-
-    public FilmDbStorageDao(JdbcTemplate jdbcTemplate, FilmGenreDao filmGenreDao, LikeDao likeDao, MpaDao mpaDao) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.filmGenreDao = filmGenreDao;
-        this.likeDao = likeDao;
-        this.mpaDao = mpaDao;
-    }
-
 
     @Override
     public Film addFilm(Film film) {
-        String sqlQuery = "INSERT INTO FILM ( name, description, release_date, duration, mpa)" +
-                          "VALUES (?,?,?,?,?)";
+        String sqlQuery = "INSERT INTO FILM ( name, description, release_date, duration, mpa, rate) " +
+                          "VALUES (?,?,?,?,?,?)";
 
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
-            stmt.setString(1, film.getName());
-            stmt.setString(2, film.getDescription());
-            stmt.setDate(3, Date.valueOf(film.getReleaseDate()));
-            stmt.setInt(4, (int) film.getDuration().toMinutes());
-            stmt.setInt(5, film.getMpa().getId());
-            return stmt;
-        }, keyHolder);
-        long idKey = keyHolder.getKey().longValue();
-        film.setId(idKey);
-
-        return film;
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            jdbcTemplate.update(connection -> {
+                PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
+                stmt.setString(1, film.getName());
+                stmt.setString(2, film.getDescription());
+                stmt.setDate(3, Date.valueOf(film.getReleaseDate()));
+                stmt.setInt(4, (int) film.getDuration().toSeconds());
+                stmt.setInt(5, film.getMpa().getId());
+                stmt.setInt(6, film.getRate());
+                return stmt;
+            }, keyHolder);
+            long idKey = keyHolder.getKey().longValue();
+            film.setId(idKey);
+            if(film.getGenres() == null || film.getGenres().isEmpty()){
+                return film;
+            }
+                filmGenreDao.insertFilmGenre(film);
+            return film;
     }
 
     @Override
@@ -71,17 +66,16 @@ public class FilmDbStorageDao implements FilmStorage {
         String sql = "SELECT id, name, description, release_date, duration, mpa, rate " +
                      "FROM film " +
                      "WHERE id = ?";
-        Film film = null;
+        Film film;
         try {
             film = jdbcTemplate.queryForObject(sql,
-                    (ResultSet rs, int rowNum) -> {
-                        return makeFilm(rs);
-                    },
+                    (ResultSet rs, int rowNum) -> makeFilm(rs),
                     id);
             log.info("Найден фильм: c id = {} названием = {}", film.getId(), film.getName());
             film.setLikes(likeDao.getFilmLikes(id));
             film.setGenres(filmGenreDao.getFilmGenre(id));
             film.setMpa(mpaDao.getMpaById(film.getMpa().getId()));
+            System.out.println(film);
             return film;
         } catch (EmptyResultDataAccessException e) {
             log.debug("Фильм с идентификатором {} не найден.", id);
@@ -99,18 +93,18 @@ public class FilmDbStorageDao implements FilmStorage {
     public Film updateFilm(Film film) {
 
         String sql = "UPDATE FILM " +
-                     "SET name = ?," +
-                         "description = ?," +
-                         "release_date = ?," +
-                         "duration = ?," +
-                         "mpa = ?,"+
+                     "SET name = ?, " +
+                         "description = ?, " +
+                         "release_date = ?, " +
+                         "duration = ?, " +
+                         "mpa = ?, "+
                          "rate = ? " +
-                     "WHERE id = ?";
+                     " WHERE id = ?";
         int updatedRows = jdbcTemplate.update(sql
                                             , film.getName()
                                             , film.getDescription()
                                             , Date.valueOf(film.getReleaseDate())
-                                            , (int) film.getDuration().toMinutes()
+                                            , (int) film.getDuration().toSeconds()
                                             , film.getMpa().getId()
                                             , film.getRate()
                                             , film.getId());
@@ -119,14 +113,18 @@ public class FilmDbStorageDao implements FilmStorage {
             throw new EntityDoesNotExistException(
                     String.format("Фильм с идентификатором %d не найден.", film.getId()));
         } else{
-            return film;
+            filmGenreDao.deleteAllFilmGenresByFilmId(film.getId());
+            if(film.getGenres() == null || film.getGenres().isEmpty()){
+                return film;
+            }
+            return filmGenreDao.insertFilmGenre(film);
         }
     }
 
     @Override
     public List<Film> getAllFilms() {
-        String sql = "SELECT id, name, description, release_date, duration, mpa, rate " +
-                "FROM film ";
+        String sql = "SELECT id, name, description, release_date, duration, mpa ,rate " +
+                      "FROM film ";
         List<Film> films =  jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
         films.forEach((film) -> {
             film.setLikes(likeDao.getFilmLikes(film.getId()));
@@ -146,7 +144,7 @@ public class FilmDbStorageDao implements FilmStorage {
         String name = rs.getString("name");
         String description = rs.getString("description");
         LocalDate releaseDate = rs.getDate("release_date").toLocalDate();
-        Duration duration = Duration.ofMinutes(rs.getInt("duration"));
+        Duration duration = Duration.ofSeconds(rs.getInt("duration"));
         Mpa mpa = new Mpa(rs.getInt("mpa"));
         int rate = rs.getInt("rate");
 
@@ -156,9 +154,41 @@ public class FilmDbStorageDao implements FilmStorage {
                     .description(description)
                     .releaseDate(releaseDate)
                     .duration(duration)
-                    .mpa(mpa)
                     .rate(rate)
+                    .mpa(mpa)
                     .build();
+    }
+    @Override
+    public List<Film> getMostLikedFilms(int limit) {
+
+        String sql = String.format(
+                "SELECT id, name, description, release_date, duration, mpa, rate \n" +
+                        "FROM " +
+                              "(\n" +
+                                  "    SELECT id, name, description, release_date, duration, mpa, rate, count_likes  \n" +
+                                  "    FROM film f \n" +
+                                  "    LEFT JOIN (\n" +
+                                                "       SELECT film_id, COUNT(film_id) as count_likes\n" +
+                                                "       FROM  likes \n" +
+                                                "       GROUP BY film_id \n" +
+                                                "       ORDER BY COUNT(film_id) DESC \n" +
+                                                "       LIMIT %d\n" +
+                                                "       ) AS temp ON f.ID = temp.FILM_ID\n"
+                             + "    ) as t " +
+                "ORDER BY t.count_likes DESC\n" +
+                "LIMIT %d"
+                , limit, limit);
+
+        System.out.println(sql);
+
+        List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) ->  makeFilm(rs));
+
+        films.forEach((film) -> {
+            film.setLikes(likeDao.getFilmLikes(film.getId()));
+            film.setGenres(filmGenreDao.getFilmGenre(film.getId()));
+            film.setMpa(mpaDao.getMpaById(film.getMpa().getId()));
+        });
+        return films;
     }
 }
 

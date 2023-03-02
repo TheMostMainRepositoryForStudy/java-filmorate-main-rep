@@ -1,5 +1,6 @@
 package ru.yandex.practicum.javafilmorate.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,16 +12,12 @@ import java.util.List;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class LikeDao {
 
     private final UserDbStorageDao userDbStorageDao;
 
     private final JdbcTemplate jdbcTemplate;
-
-    public LikeDao(UserDbStorageDao userDbStorageDao, JdbcTemplate jdbcTemplate) {
-        this.userDbStorageDao = userDbStorageDao;
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     public List<User> getFilmLikes(long id){
         String sql =    "SELECT  UF.id, UF.email, UF.login, UF.name, UF.birthday " +
@@ -45,6 +42,12 @@ public class LikeDao {
     }
 
     public void deleteLike(long filmId, long userId){
+        if(userId < 0){
+            log.debug("Пользователь с отрицательным id {} не может существовать.", userId);
+            throw new EntityDoesNotExistException(
+                    String.format("Пользователь с отрицательным id %d не может существовать.", userId));
+        }
+
         String sql = "DELETE FROM LIKES  " +
                       "WHERE film_Id = ? AND user_Id = ?";
         try{
@@ -53,8 +56,7 @@ public class LikeDao {
             log.debug("Фильм с id = {} или Пользователь с id = {} не найден.", filmId, userId);
             throw new EntityDoesNotExistException(
                     String.format("Фильм с id = %d или Пользователь с id = %d не найден."
-                            , filmId, userId));
+                                                                                , filmId, userId));
         }
     }
-
 }

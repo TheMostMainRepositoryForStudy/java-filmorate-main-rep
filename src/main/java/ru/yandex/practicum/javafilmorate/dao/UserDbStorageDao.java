@@ -1,7 +1,7 @@
 package ru.yandex.practicum.javafilmorate.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,22 +18,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import org.springframework.data.repository.CrudRepository;
 
 @Slf4j
 @Component
 @Qualifier("userStorageDb")
+@RequiredArgsConstructor
 public class UserDbStorageDao implements UserStorage {
 
-    @Autowired
     private final JdbcTemplate jdbcTemplate;
-
-    public UserDbStorageDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-
+    private final FriendShipDao friendShipDao;
     @Override
     public User addUser(User user) {
         String sqlQuery = "insert into USER_FILMORATE(  EMAIL, login, name, birthday)" +
@@ -62,11 +55,10 @@ public class UserDbStorageDao implements UserStorage {
                      "WHERE id = ? LIMIT 1";
         try {
             User user = jdbcTemplate.queryForObject(sql,
-                    (ResultSet rs, int rowNum) -> {
-                        return makeUser(rs);
-                    },
+                    (ResultSet rs, int rowNum) -> makeUser(rs),
                     id);
             log.info("Найден пользователь: c id = {} именем = {}", user.getId(), user.getName());
+            user.setFriends(getUserFriends(id));
             return user;
         } catch(EmptyResultDataAccessException e){
             log.debug("Пользователь с идентификатором {} не найден.", id);
@@ -104,10 +96,6 @@ public class UserDbStorageDao implements UserStorage {
                                 "name = ?," +
                                 "birthday = ?" +
                            "WHERE id = ?";
-
-//        String sqlQuery = "insert into USER_FILMORATE(  EMAIL, login, name, birthday)" +
-//                "values (?,?,?,?)";
-
         int updatedRows= jdbcTemplate.update(sqlQuery
                                                     , user.getEmail()
                                                     , user.getLogin()
@@ -125,11 +113,23 @@ public class UserDbStorageDao implements UserStorage {
 
     @Override
     public List<User> getAllUsers() {
-        return null;
+
+        String sql = "SELECT id, email, login, name, birthday\n" +
+                     "FROM USER_FILMORATE";
+
+        List<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs));
+        users.forEach((film) -> film.setFriends(friendShipDao.getUserFriends(film.getId())));
+        return users;
     }
 
-    @Override
-    public boolean doesUserExist(long id) {
-        return false;
+
+    public List<User> getUserFriends(long id){
+        String sql =    "SELECT  UF.id, UF.email, UF.login, UF.name, UF.birthday " +
+                "FROM FRIENDSHIP f " +
+                "LEFT JOIN USER_FILMORATE UF on f.FRIEND2_ID = UF.ID " +
+                "WHERE FRIEND1_ID = ?";
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), id);
     }
+
 }

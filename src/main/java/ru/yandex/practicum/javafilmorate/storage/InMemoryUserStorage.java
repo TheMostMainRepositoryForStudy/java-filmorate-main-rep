@@ -93,9 +93,4 @@ public class InMemoryUserStorage implements UserStorage{
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
     }
-
-    @Override
-    public boolean doesUserExist(long id) {
-        return users.containsKey(id);
-    }
 }

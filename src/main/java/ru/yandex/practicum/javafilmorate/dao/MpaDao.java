@@ -1,5 +1,6 @@
 package ru.yandex.practicum.javafilmorate.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,19 +10,15 @@ import ru.yandex.practicum.javafilmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Collections;
+
 import java.util.List;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class MpaDao {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public MpaDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     public List<Mpa> getAll(){
         String sql = "SELECT id, name " +
@@ -36,9 +33,7 @@ public class MpaDao {
                      "WHERE id = ?";
 
         try{    Mpa mpa = jdbcTemplate.queryForObject(sql,
-                (ResultSet rs, int rowNum) -> {
-                    return makeMpa(rs);
-                },
+                (ResultSet rs, int rowNum) -> makeMpa(rs),
                 id);
                 log.info("Найден MPA-рейтинг: c id = {} названием = {}", mpa.getId(), mpa.getName());
                 return mpa;
@@ -48,7 +43,6 @@ public class MpaDao {
                                                 "MPA с идентификатором %d не найден.", id));
         }
     }
-
 
     private Mpa makeMpa( ResultSet rs) throws SQLException {
         int id = rs.getInt("id");

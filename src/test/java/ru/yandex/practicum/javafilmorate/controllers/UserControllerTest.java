@@ -24,7 +24,7 @@ class UserControllerTest {
             .findAndRegisterModules()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    private static final int PORT = 8080;
+    private static final int PORT = 8081;
 
     @Test
     public void shouldReturnUserEmailNullOrEmptyException() throws IOException, InterruptedException {
