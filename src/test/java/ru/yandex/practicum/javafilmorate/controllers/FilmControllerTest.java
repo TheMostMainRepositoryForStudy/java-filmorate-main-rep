@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class FilmControllerTest {
 
-    private static final int PORT = 8081;
+    private static final int PORT = 8080;
 
     private final ObjectMapper objectMapper = new ObjectMapper()
             .findAndRegisterModules()
