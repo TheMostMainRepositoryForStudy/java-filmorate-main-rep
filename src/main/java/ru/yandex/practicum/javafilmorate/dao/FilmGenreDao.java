@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.javafilmorate.model.Film;
 import ru.yandex.practicum.javafilmorate.model.Genre;
 
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
@@ -29,18 +30,21 @@ public class FilmGenreDao {
         return jdbcTemplate.query(sql, (rs, rowNum) -> genreDao.makeGenre(rs), id);
     }
     public Film insertFilmGenre(Film film){
-
-        String sql = "MERGE INTO FILM_GENRE fg USING (VALUES (?,?)) S(film, genre)\n" +
-                     "ON fg.FILM_ID = S.film AND fg.GENRE_ID = S.genre \n" +
-                     "WHEN NOT MATCHED THEN INSERT VALUES ( S.film, S.genre)";
+        String sql = "INSERT INTO FILM_GENRE(FILM_ID,GENRE_ID)  " +
+                     "VALUES(?,?)";
 
         List<Genre> uniqGenres = film.getGenres().stream().distinct().collect(Collectors.toList());
 
-        for( Genre genre: uniqGenres){
-                jdbcTemplate.update(sql
-                        , film.getId(), genre.getId());
-        }
-
+        jdbcTemplate.batchUpdate(sql,
+                new BatchPreparedStatementSetter() {
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setLong(1, film.getId());
+                        ps.setLong(2, uniqGenres.get(i).getId());
+                    }
+                    public int getBatchSize() {
+                        return uniqGenres.size();
+                    }
+                });
         film.setGenres(uniqGenres);
         return film;
     }
