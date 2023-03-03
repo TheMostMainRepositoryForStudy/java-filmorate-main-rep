@@ -34,8 +34,10 @@ public class GenreDao {
         try{    Genre mpa = jdbcTemplate.queryForObject(sql,
                 (ResultSet rs, int rowNum) -> makeGenre(rs),
                 id);
+            if(mpa != null){
                 log.info("Найден Жанр: c id = {} названием = {}", mpa.getId(), mpa.getName());
-                return mpa;
+            }
+            return mpa;
         } catch(EmptyResultDataAccessException e){
             log.debug("Жанр с идентификатором {} не найден.", id);
             throw new EntityDoesNotExistException(String.format(

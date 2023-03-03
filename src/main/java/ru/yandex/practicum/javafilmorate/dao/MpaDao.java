@@ -35,7 +35,9 @@ public class MpaDao {
         try{    Mpa mpa = jdbcTemplate.queryForObject(sql,
                 (ResultSet rs, int rowNum) -> makeMpa(rs),
                 id);
+            if(mpa !=  null){
                 log.info("Найден MPA-рейтинг: c id = {} названием = {}", mpa.getId(), mpa.getName());
+            }
                 return mpa;
         } catch(EmptyResultDataAccessException e){
             log.debug("MPA-рейтинг с идентификатором {} не найден.", id);

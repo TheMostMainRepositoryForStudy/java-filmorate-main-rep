@@ -5,9 +5,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.javafilmorate.model.Genre;
-import ru.yandex.practicum.javafilmorate.model.Mpa;
 import ru.yandex.practicum.javafilmorate.service.GenreService;
-import ru.yandex.practicum.javafilmorate.service.MpaService;
 
 import java.util.List;
 

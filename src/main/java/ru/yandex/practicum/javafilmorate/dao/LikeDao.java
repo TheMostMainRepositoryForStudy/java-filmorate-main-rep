@@ -39,6 +39,11 @@ public class LikeDao {
                     String.format("Фильм с id = %d или Пользователь с id = %d не найден."
                                                                                 , filmId, userId));
         }
+
+        String sql2 = "UPDATE FILM\n" +
+                      "SET LIKES_AMOUNT = LIKES_AMOUNT + 1\n" +
+                      "WHERE ID = ?";
+        jdbcTemplate.update(sql2, filmId);
     }
 
     public void deleteLike(long filmId, long userId){
@@ -58,5 +63,11 @@ public class LikeDao {
                     String.format("Фильм с id = %d или Пользователь с id = %d не найден."
                                                                                 , filmId, userId));
         }
+
+
+        String sql2 = "UPDATE FILM\n" +
+                      "SET LIKES_AMOUNT = LIKES_AMOUNT - 1\n" +
+                      "WHERE ID = ?";
+        jdbcTemplate.update(sql2, filmId);
     }
 }

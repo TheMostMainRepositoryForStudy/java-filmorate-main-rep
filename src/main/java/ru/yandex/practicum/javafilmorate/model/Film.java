@@ -37,19 +37,18 @@ public class Film implements Serializable {
 
     private List<Genre> genres;
 
-    public Film() {
+    private int likesAmount;
 
-    }
-
-    public Film(long id,
-                String name,
-                String description,
-                LocalDate releaseDate,
-                Duration duration,
-                List<User> likes,
-                int rate,
-                Mpa mpa,
-                List<Genre> genres) {
+    public Film(long id
+            , String name
+            , String description
+            , LocalDate releaseDate
+            , Duration duration
+            , List<User> likes
+            , int rate
+            , Mpa mpa
+            , List<Genre> genres
+            , int likesAmount) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -59,5 +58,6 @@ public class Film implements Serializable {
         this.rate = rate;
         this.mpa = mpa;
         this.genres = genres;
+        this.likesAmount = likesAmount;
     }
 }

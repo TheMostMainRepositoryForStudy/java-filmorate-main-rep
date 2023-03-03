@@ -57,8 +57,10 @@ public class UserDbStorageDao implements UserStorage {
             User user = jdbcTemplate.queryForObject(sql,
                     (ResultSet rs, int rowNum) -> makeUser(rs),
                     id);
-            log.info("Найден пользователь: c id = {} именем = {}", user.getId(), user.getName());
-            user.setFriends(getUserFriends(id));
+            if(user != null){
+                log.info("Найден пользователь: c id = {} именем = {}", user.getId(), user.getName());
+                user.setFriends(getUserFriends(id));
+            }
             return user;
         } catch(EmptyResultDataAccessException e){
             log.debug("Пользователь с идентификатором {} не найден.", id);
@@ -84,7 +86,11 @@ public class UserDbStorageDao implements UserStorage {
 
     @Override
     public User removeUser(Long id) {
-        return null;
+        User user = getUser(id);
+        String sql = "DELETE FROM USER_FILMORATE \n" +
+                     "WHERE id = ?";
+        jdbcTemplate.update(sql, id);
+        return user;
     }
 
     @Override

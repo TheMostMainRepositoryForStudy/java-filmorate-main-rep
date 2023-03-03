@@ -1,9 +1,9 @@
 //SET MODE POSTGRESQL;
-drop table if exists film cascade;
-drop table if exists  GENRE cascade;
-drop table if exists  MPA cascade;
-drop table if exists  LIKES cascade;
-drop table if exists  USER_FILMORATE cascade;
+drop table if exists FILM cascade;
+drop table if exists GENRE cascade;
+drop table if exists MPA cascade;
+drop table if exists LIKES cascade;
+drop table if exists USER_FILMORATE cascade;
 drop table if exists FILM_GENRE cascade;
 drop table if exists FRIENDSHIP cascade;
 
@@ -35,6 +35,7 @@ create table IF NOT EXISTS FILM
     DURATION     INTEGER,
     MPA          INTEGER,
     RATE         INTEGER,
+    LIKES_AMOUNT INTEGER,
     constraint FILM_PK
         primary key (ID),
     constraint MPA_FK
