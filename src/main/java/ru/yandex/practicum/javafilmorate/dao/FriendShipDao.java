@@ -42,9 +42,9 @@ public class FriendShipDao {
 
     public List<User> getUserFriends(long id){
         String sql =    "SELECT  UF.id, UF.email, UF.login, UF.name, UF.birthday " +
-                "FROM FRIENDSHIP f " +
-                "LEFT JOIN USER_FILMORATE UF on f.FRIEND2_ID = UF.ID " +
-                "WHERE FRIEND1_ID = ?";
+                        "FROM FRIENDSHIP f " +
+                        "LEFT JOIN USER_FILMORATE UF on f.FRIEND2_ID = UF.ID " +
+                        "WHERE FRIEND1_ID = ?";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), id);
     }
@@ -62,4 +62,5 @@ public class FriendShipDao {
 
         return jdbcTemplate.query(sql2, (rs, rowNum) -> User.makeUser(rs), friend1, friend2);
     }
+
 }

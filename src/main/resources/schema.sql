@@ -47,11 +47,10 @@ create unique index IF NOT EXISTS FILM_ID_UINDEX
 
 create table IF NOT EXISTS FILM_GENRE
 (
-    ID       BIGINT auto_increment,
     FILM_ID  BIGINT not null,
     GENRE_ID BIGINT not null,
     constraint FILM_GENRE_PK
-        primary key (ID),
+        primary key (FILM_ID, GENRE_ID),
     constraint FILM_FK
         foreign key (FILM_ID) references FILM
             on update cascade on delete cascade,
@@ -61,7 +60,7 @@ create table IF NOT EXISTS FILM_GENRE
 );
 
 create unique index IF NOT EXISTS FILM_GENRE_ID_UINDEX
-    on FILM_GENRE (ID);
+    on FILM_GENRE (FILM_ID, GENRE_ID);
 
 create unique index IF NOT EXISTS MPA_ID_UINDEX
     on MPA (ID);

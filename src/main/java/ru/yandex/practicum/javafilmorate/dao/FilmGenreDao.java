@@ -11,6 +11,8 @@ import ru.yandex.practicum.javafilmorate.model.Genre;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -26,32 +28,27 @@ public class FilmGenreDao {
                      "WHERE fg.film_id = ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> genreDao.makeGenre(rs), id);
     }
-    public Film insertFilmGenre(Film film ){
+    public Film insertFilmGenre(Film film){
 
-        String sql = "INSERT INTO FILM_GENRE(FILM_ID,GENRE_ID)  " +
-                     "VALUES(?,?)";
+        String sql = "MERGE INTO FILM_GENRE fg USING (VALUES (?,?)) S(film, genre)\n" +
+                     "ON fg.FILM_ID = S.film AND fg.GENRE_ID = S.genre \n" +
+                     "WHEN NOT MATCHED THEN INSERT VALUES ( S.film, S.genre)";
 
-        ArrayList<Genre> genres = new ArrayList(new HashSet<>(film.getGenres()));
-        genres.sort(Comparator.comparing(Genre::getId));
-        jdbcTemplate.batchUpdate(sql,
-                new BatchPreparedStatementSetter() {
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        ps.setLong(1, film.getId());
-                        ps.setLong(2, genres.get(i).getId());
-                    }
-                    public int getBatchSize() {
-                        return genres.size();
-                    }
-                });
-        film.setGenres(genres);
+        List<Genre> uniqGenres = film.getGenres().stream().distinct().collect(Collectors.toList());
 
+        for( Genre genre: uniqGenres){
+                jdbcTemplate.update(sql
+                        , film.getId(), genre.getId());
+        }
+
+        film.setGenres(uniqGenres);
         return film;
     }
 
     public void deleteAllFilmGenresByFilmId(long filmId ){
 
         String sql = "DELETE FROM FILM_GENRE " +
-                      "WHERE film_id = ?";
+                     "WHERE film_id = ?";
         jdbcTemplate.update(sql,filmId);
     }
 

@@ -10,6 +10,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityDoesNotExistException;
 import ru.yandex.practicum.javafilmorate.model.Film;
+import ru.yandex.practicum.javafilmorate.model.Genre;
 import ru.yandex.practicum.javafilmorate.model.Mpa;
 import ru.yandex.practicum.javafilmorate.storage.FilmStorage;
 
@@ -19,6 +20,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
@@ -91,7 +94,6 @@ public class FilmDbStorageDao implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-
         String sql = "UPDATE FILM " +
                      "SET name = ?, " +
                          "description = ?, " +
@@ -119,6 +121,9 @@ public class FilmDbStorageDao implements FilmStorage {
             }
             return filmGenreDao.insertFilmGenre(film);
         }
+
+
+
     }
 
     @Override
