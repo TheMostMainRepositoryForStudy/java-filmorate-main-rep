@@ -1,4 +1,3 @@
-//SET MODE POSTGRESQL;
 drop table if exists FILM cascade;
 drop table if exists GENRE cascade;
 drop table if exists MPA cascade;

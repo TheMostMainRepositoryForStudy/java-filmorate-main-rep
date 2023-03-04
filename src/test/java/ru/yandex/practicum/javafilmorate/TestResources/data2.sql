@@ -22,10 +22,10 @@ VALUES (1,2),
        (1,3),
        (2,3);
 
-INSERT INTO FILM (NAME, DESCRIPTION, RELEASE_DATE, DURATION, MPA)
-VALUES  ('Titanic', 'Test description',  DATE '1997-1-27', 90, 1),
-        ('Titanic2', 'Test description2',  DATE '1997-1-27', 90, 1),
-        ('Titanic23', 'Test description23',  DATE '1997-1-27', 90, 1);
+INSERT INTO FILM (NAME, DESCRIPTION, RELEASE_DATE, DURATION, MPA, LIKES_AMOUNT)
+VALUES  ('Titanic', 'Test description',  DATE '1997-1-27', 90, 1,0),
+        ('Titanic2', 'Test description2',  DATE '1997-1-27', 90, 1,0),
+        ('Titanic23', 'Test description23',  DATE '1997-1-27', 90, 1,0);
 
 INSERT INTO LIKES (FILM_ID, USER_ID)
 VALUES (1,2),
