@@ -2,6 +2,7 @@ package ru.yandex.practicum.javafilmorate.storage;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityAlreadyExistsException;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityDoesNotExistException;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@Qualifier("userStorage")
 @Slf4j
 public class InMemoryUserStorage implements UserStorage{
 
@@ -90,10 +92,5 @@ public class InMemoryUserStorage implements UserStorage{
     @Override
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
-    }
-
-    @Override
-    public boolean doesUserExist(long id) {
-        return users.containsKey(id);
     }
 }

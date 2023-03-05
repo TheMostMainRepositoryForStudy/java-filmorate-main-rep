@@ -127,7 +127,7 @@ class FilmControllerTest {
     }
 
     String generateLetterString(int targetStringLength) {
-        int leftLimit = 97;
+         int leftLimit = 97;
         int rightLimit = 122;
         Random random = new Random();
 

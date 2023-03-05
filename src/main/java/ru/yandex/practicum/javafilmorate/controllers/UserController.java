@@ -15,6 +15,7 @@ public class UserController {
 
     private final UserService userService;
 
+
     public UserController(UserService userService) {
         this.userService = userService;
     }
@@ -38,7 +39,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable long id) {
+    public User getUsero(@PathVariable long id) {
         log.info(String.format("Получен запрос 'GET /users/%d'", id));
         return userService.getUserFromStorage(id);
     }

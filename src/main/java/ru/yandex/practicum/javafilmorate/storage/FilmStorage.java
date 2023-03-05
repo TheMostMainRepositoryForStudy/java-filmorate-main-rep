@@ -18,4 +18,6 @@ public interface FilmStorage {
      List<Film> getAllFilms();
      boolean doesFilmExist(long id);
 
+     public List<Film> getMostLikedFilms(int limit);
+
 }

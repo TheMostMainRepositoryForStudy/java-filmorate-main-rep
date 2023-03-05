@@ -1,14 +1,21 @@
 package ru.yandex.practicum.javafilmorate.util;
 
+
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.javafilmorate.model.Film;
+
 
 import java.time.Duration;
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class StringValidatorTest {
+
 
     @Test
     void isNullOrEmpty() {
@@ -29,4 +36,5 @@ class StringValidatorTest {
         assertTrue(StringValidator.isNullOrEmpty(titanicWithEmptyName.getName()));
         assertTrue(StringValidator.isNullOrEmpty(titanicWithNullName.getName()));
     }
+
 }
