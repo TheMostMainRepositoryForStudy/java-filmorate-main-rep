@@ -41,7 +41,6 @@ public class FilmDbStorageDao implements FilmStorage {
     public Film addFilm(Film film) {
         String sqlQuery = "INSERT INTO FILM ( name, description, release_date, duration, mpa, rate, LIKES_AMOUNT) " +
                           "VALUES (?,?,?,?,?,?,?)";
-
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbcTemplate.update(connection -> {
                 PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});

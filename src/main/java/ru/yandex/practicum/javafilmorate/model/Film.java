@@ -8,7 +8,6 @@ import ru.yandex.practicum.javafilmorate.util.FilmDate;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
@@ -18,7 +17,8 @@ import java.util.List;
 @ToString
 @EqualsAndHashCode
 @Builder
-public class Film implements Serializable {
+@AllArgsConstructor
+public class Film  {
 
     @EqualsAndHashCode.Exclude
     private long id;
@@ -34,30 +34,6 @@ public class Film implements Serializable {
     private List<User> likes;
     private int rate;
     private Mpa mpa;
-
     private List<Genre> genres;
-
     private int likesAmount;
-
-    public Film(long id
-            , String name
-            , String description
-            , LocalDate releaseDate
-            , Duration duration
-            , List<User> likes
-            , int rate
-            , Mpa mpa
-            , List<Genre> genres
-            , int likesAmount) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        this.likes = likes;
-        this.rate = rate;
-        this.mpa = mpa;
-        this.genres = genres;
-        this.likesAmount = likesAmount;
-    }
 }
