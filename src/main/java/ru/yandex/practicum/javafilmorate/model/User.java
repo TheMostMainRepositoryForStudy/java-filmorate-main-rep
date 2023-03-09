@@ -40,7 +40,7 @@ public class User {
         String name = rs.getString("name");
         LocalDate birthday =  rs.getDate("birthday").toLocalDate();
 
-        return User.builder()
+        return builder()
                 .id(id)
                 .email(email)
                 .login(login)

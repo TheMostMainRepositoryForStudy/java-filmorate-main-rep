@@ -9,7 +9,6 @@ import ru.yandex.practicum.javafilmorate.exceptions.EntityDoesNotExistException;
 import ru.yandex.practicum.javafilmorate.model.Genre;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 @Slf4j
@@ -23,7 +22,7 @@ public class GenreDao {
         String sql = "SELECT id, name " +
                      "FROM Genre";
 
-      return jdbcTemplate.query(sql, (rs, rowNum) -> makeGenre(rs));
+      return jdbcTemplate.query(sql, (rs, rowNum) -> Genre.makeGenre(rs));
     }
 
     public Genre getGenreById(long id){
@@ -32,7 +31,7 @@ public class GenreDao {
                      "WHERE id = ?";
 
         try{    Genre mpa = jdbcTemplate.queryForObject(sql,
-                (ResultSet rs, int rowNum) -> makeGenre(rs),
+                (ResultSet rs, int rowNum) -> Genre.makeGenre(rs),
                 id);
             if(mpa != null){
                 log.info("Найден Жанр: c id = {} названием = {}", mpa.getId(), mpa.getName());
@@ -43,11 +42,5 @@ public class GenreDao {
             throw new EntityDoesNotExistException(String.format(
                                                 "Жанр с идентификатором %d не найден.", id));
         }
-    }
-
-    public Genre makeGenre(ResultSet rs) throws SQLException {
-        int id = rs.getInt("id");
-        String name = rs.getString("name");
-        return new Genre(id,name);
     }
 }

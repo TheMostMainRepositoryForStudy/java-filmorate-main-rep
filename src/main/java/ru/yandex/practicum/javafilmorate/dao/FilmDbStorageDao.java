@@ -10,15 +10,11 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityDoesNotExistException;
 import ru.yandex.practicum.javafilmorate.model.Film;
-import ru.yandex.practicum.javafilmorate.model.Mpa;
 import ru.yandex.practicum.javafilmorate.storage.FilmStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.Duration;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,7 +55,7 @@ public class FilmDbStorageDao implements FilmStorage {
         Film film;
         try {
             film = jdbcTemplate.queryForObject(sql,
-                    (ResultSet rs, int rowNum) -> makeFilm(rs),
+                    (ResultSet rs, int rowNum) -> Film.makeFilm(rs),
                     id);
             assert film != null;
             log.info("Найден фильм: c id = {} названием = {}", film.getId(), film.getName());
@@ -109,7 +105,7 @@ public class FilmDbStorageDao implements FilmStorage {
     public List<Film> getAllFilms() {
         String sql = "SELECT id, name, description, release_date, duration, mpa ,rate , LIKES_AMOUNT \n" +
                       "FROM film ";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
+        return jdbcTemplate.query(sql, (rs, rowNum) -> Film.makeFilm(rs));
     }
 
     @Override
@@ -118,27 +114,6 @@ public class FilmDbStorageDao implements FilmStorage {
         return film != null ;
     }
 
-    private Film makeFilm( ResultSet rs) throws SQLException {
-        long id = rs.getLong("id");
-        String name = rs.getString("name");
-        String description = rs.getString("description");
-        LocalDate releaseDate = rs.getDate("release_date").toLocalDate();
-        Duration duration = Duration.ofSeconds(rs.getInt("duration"));
-        Mpa mpa = new Mpa(rs.getInt("mpa"));
-        int rate = rs.getInt("rate");
-        int likesAmount = rs.getInt("LIKES_AMOUNT");
-
-        return Film.builder()
-                    .id(id)
-                    .name(name)
-                    .description(description)
-                    .releaseDate(releaseDate)
-                    .duration(duration)
-                    .rate(rate)
-                    .mpa(mpa)
-                    .likesAmount(likesAmount)
-                    .build();
-    }
     @Override
     public List<Film> getMostLikedFilms(int limit) {
         String sql = String.format(
@@ -147,7 +122,7 @@ public class FilmDbStorageDao implements FilmStorage {
                 "ORDER BY LIKES_AMOUNT DESC\n" +
                 "LIMIT %d", limit
                 );
-        return jdbcTemplate.query(sql, (rs, rowNum) ->  makeFilm(rs));
+        return jdbcTemplate.query(sql, (rs, rowNum) ->  Film.makeFilm(rs));
     }
 }
 

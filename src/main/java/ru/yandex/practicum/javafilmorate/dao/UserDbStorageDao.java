@@ -15,8 +15,6 @@ import ru.yandex.practicum.javafilmorate.storage.UserStorage;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -56,7 +54,7 @@ public class UserDbStorageDao implements UserStorage {
                      "WHERE id = ? LIMIT 1";
         try {
             User user = jdbcTemplate.queryForObject(sql,
-                    (ResultSet rs, int rowNum) -> makeUser(rs),
+                    (ResultSet rs, int rowNum) -> User.makeUser(rs),
                     id);
             if(user != null){
                 log.info("Найден пользователь: c id = {} именем = {}", user.getId(), user.getName());
@@ -67,22 +65,6 @@ public class UserDbStorageDao implements UserStorage {
             log.debug("Пользователь с идентификатором {} не найден.", id);
             throw new EntityDoesNotExistException(String.format("Пользователь с идентификатором %d не найден.", id));
         }
-    }
-
-    public User makeUser(ResultSet rs) throws SQLException {
-        long id = rs.getLong("id");
-        String email = rs.getString("email");
-        String login = rs.getString("login");
-        String name = rs.getString("name");
-        LocalDate birthday =  rs.getDate("birthday").toLocalDate();
-
-        return User.builder()
-                .id(id)
-                .email(email)
-                .login(login)
-                .name(name)
-                .birthday(birthday)
-                .build();
     }
 
     @Override
@@ -133,7 +115,7 @@ public class UserDbStorageDao implements UserStorage {
                 "LEFT JOIN USER_FILMORATE UF on f.FRIEND2_ID = UF.ID " +
                 "WHERE FRIEND1_ID = ?";
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), id);
+        return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), id);
     }
 
 }

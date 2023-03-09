@@ -21,14 +21,13 @@ import java.util.stream.Collectors;
 public class FilmGenreDao {
 
     private final JdbcTemplate jdbcTemplate;
-    private final GenreDao genreDao;
 
     public List<Genre> getFilmGenre(long id){
         String sql = "SELECT g.id, g.name " +
                      "FROM film_genre fg " +
                      "LEFT JOIN genre g ON  fg.genre_id = g.id " +
                      "WHERE fg.film_id = ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> genreDao.makeGenre(rs), id);
+        return jdbcTemplate.query(sql, (rs, rowNum) -> Genre.makeGenre(rs), id);
     }
     public Film insertFilmGenre(Film film){
         String sql = "INSERT INTO FILM_GENRE(FILM_ID,GENRE_ID)  " +

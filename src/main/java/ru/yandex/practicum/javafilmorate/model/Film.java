@@ -8,6 +8,8 @@ import ru.yandex.practicum.javafilmorate.util.FilmDate;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
@@ -36,4 +38,26 @@ public class Film  {
     private Mpa mpa;
     private List<Genre> genres;
     private int likesAmount;
+
+    public static Film makeFilm(ResultSet rs) throws SQLException {
+        long id = rs.getLong("id");
+        String name = rs.getString("name");
+        String description = rs.getString("description");
+        LocalDate releaseDate = rs.getDate("release_date").toLocalDate();
+        Duration duration = Duration.ofSeconds(rs.getInt("duration"));
+        Mpa mpa = new Mpa(rs.getInt("mpa"));
+        int rate = rs.getInt("rate");
+        int likesAmount = rs.getInt("LIKES_AMOUNT");
+
+        return builder()
+                    .id(id)
+                    .name(name)
+                    .description(description)
+                    .releaseDate(releaseDate)
+                    .duration(duration)
+                    .rate(rate)
+                    .mpa(mpa)
+                    .likesAmount(likesAmount)
+                    .build();
+    }
 }

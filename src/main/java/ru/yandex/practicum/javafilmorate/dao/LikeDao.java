@@ -6,7 +6,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityDoesNotExistException;
-import ru.yandex.practicum.javafilmorate.model.FilmGenre;
 import ru.yandex.practicum.javafilmorate.model.Like;
 import ru.yandex.practicum.javafilmorate.model.User;
 
@@ -19,8 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LikeDao {
 
-    private final UserDbStorageDao userDbStorageDao;
-
     private final JdbcTemplate jdbcTemplate;
 
     public List<User> getFilmLikes(long id){
@@ -29,7 +26,7 @@ public class LikeDao {
                         "LEFT JOIN USER_FILMORATE UF on l.USER_ID = UF.ID " +
                         "WHERE film_id = ? ";
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> userDbStorageDao.makeUser(rs), id);
+        return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), id);
     }
 
     public void putLike(long filmId, long userId){
