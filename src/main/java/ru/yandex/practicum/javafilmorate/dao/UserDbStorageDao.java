@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -26,7 +27,7 @@ import java.util.List;
 public class UserDbStorageDao implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final FriendShipDao friendShipDao;
+
     @Override
     public User addUser(User user) {
         String sqlQuery = "insert into USER_FILMORATE(  EMAIL, login, name, birthday)" +
@@ -43,7 +44,7 @@ public class UserDbStorageDao implements UserStorage {
             stmt.setDate(4, Date.valueOf( user.getBirthday()));
             return stmt;
         }, keyHolder);
-       long idKey = keyHolder.getKey().longValue();
+       long idKey = Objects.requireNonNull(keyHolder.getKey()).longValue();
        user.setId(idKey);
        return user;
     }
@@ -122,10 +123,7 @@ public class UserDbStorageDao implements UserStorage {
 
         String sql = "SELECT id, email, login, name, birthday\n" +
                      "FROM USER_FILMORATE";
-
-        List<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs));
-        users.forEach((film) -> film.setFriends(friendShipDao.getUserFriends(film.getId())));
-        return users;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs));
     }
 
 

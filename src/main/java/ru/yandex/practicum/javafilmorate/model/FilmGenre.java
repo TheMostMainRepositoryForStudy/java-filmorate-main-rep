@@ -8,12 +8,10 @@ import lombok.*;
 @EqualsAndHashCode
 @Builder
 public class FilmGenre {
-    private long id;
     private long genreId;
     private long filmId;
 
-    public FilmGenre(long id, long genreId, long filmId) {
-        this.id = id;
+    public FilmGenre(long genreId, long filmId) {
         this.genreId = genreId;
         this.filmId = filmId;
     }

@@ -6,8 +6,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityDoesNotExistException;
+import ru.yandex.practicum.javafilmorate.model.Friendship;
 import ru.yandex.practicum.javafilmorate.model.User;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 @Slf4j
@@ -61,4 +64,19 @@ public class FriendShipDao {
         return jdbcTemplate.query(sql2, (rs, rowNum) -> User.makeUser(rs), friend1, friend2);
     }
 
+
+    public List<Friendship> getAllFriendship(){
+
+        String sql2 =   "SELECT f.friend1_id, f.friend2_id \n" +
+                        "FROM FRIENDSHIP f \n";
+
+        return jdbcTemplate.query(sql2, (rs, rowNum) -> makeFriendship(rs));
+    }
+
+    public Friendship makeFriendship(ResultSet rs) throws SQLException {
+        long friend1_id = rs.getLong("friend1_id");
+        long friend2_id = rs.getLong("friend2_id");
+
+        return Friendship.builder().friend1Id(friend1_id).friend2Id(friend2_id).build();
+    }
 }

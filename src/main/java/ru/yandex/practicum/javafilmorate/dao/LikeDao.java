@@ -6,8 +6,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityDoesNotExistException;
+import ru.yandex.practicum.javafilmorate.model.FilmGenre;
+import ru.yandex.practicum.javafilmorate.model.Like;
 import ru.yandex.practicum.javafilmorate.model.User;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 @Slf4j
@@ -64,10 +68,22 @@ public class LikeDao {
                                                                                 , filmId, userId));
         }
 
-
         String sql2 = "UPDATE FILM\n" +
                       "SET LIKES_AMOUNT = LIKES_AMOUNT - 1\n" +
                       "WHERE ID = ?";
         jdbcTemplate.update(sql2, filmId);
+    }
+
+    public List<Like> getAllLikes(){
+        String sql =    "SELECT l.film_id, l.user_id " +
+                        "FROM likes l ";
+        return jdbcTemplate.query(sql, (ResultSet rs, int rowNum) -> makeLike(rs));
+    }
+
+    public Like makeLike(ResultSet resultSet) throws SQLException {
+        long filmId = resultSet.getLong("film_id");
+        long userId = resultSet.getLong("user_id");
+
+        return Like.builder().filmId(filmId).userId(userId).build();
     }
 }

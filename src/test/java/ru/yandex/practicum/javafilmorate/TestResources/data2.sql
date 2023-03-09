@@ -31,3 +31,8 @@ INSERT INTO LIKES (FILM_ID, USER_ID)
 VALUES (1,2),
        (1,3),
        (2,3);
+
+INSERT INTO FILM_GENRE (FILM_ID, GENRE_ID)
+VALUES (1,2),
+       (1,3),
+       (2,3);

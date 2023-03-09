@@ -6,10 +6,11 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.javafilmorate.model.Film;
+import ru.yandex.practicum.javafilmorate.model.FilmGenre;
 import ru.yandex.practicum.javafilmorate.model.Genre;
 
-
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,6 +55,19 @@ public class FilmGenreDao {
         String sql = "DELETE FROM FILM_GENRE " +
                      "WHERE film_id = ?";
         jdbcTemplate.update(sql,filmId);
+    }
+
+    public List<FilmGenre> getAllFilmGenres(){
+        String sql = "SELECT fg.film_id, fg.genre_id " +
+                     "FROM film_genre fg";
+        return jdbcTemplate.query(sql, (ResultSet rs, int rowNum) -> makeFilmGenre(rs));
+    }
+
+    public FilmGenre makeFilmGenre(ResultSet resultSet) throws SQLException {
+        long filmId = resultSet.getLong("film_id");
+        long genreId = resultSet.getLong("genre_id");
+
+        return FilmGenre.builder().filmId(filmId).genreId(genreId).build();
     }
 
 }

@@ -6,11 +6,16 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.javafilmorate.dao.FriendShipDao;
 import ru.yandex.practicum.javafilmorate.exceptions.EntityDoesNotExistException;
+import ru.yandex.practicum.javafilmorate.model.Friendship;
 import ru.yandex.practicum.javafilmorate.model.User;
 import ru.yandex.practicum.javafilmorate.storage.UserStorage;
 import ru.yandex.practicum.javafilmorate.util.StringValidator;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -30,7 +35,24 @@ public class UserService {
     }
 
     public List<User> getAllUsersFromStorage() {
-        return userStorage.getAllUsers();
+
+        List<User> users =  userStorage.getAllUsers();
+        List<Friendship> allFriendship = friendShipDao.getAllFriendship();
+
+        Map<Long, User> allUsers = userStorage.getAllUsers()
+                .stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+
+        Map<Long, List<User>> mappedUsers = new HashMap<>();
+
+        for (Friendship friendship : allFriendship) {
+            if (!mappedUsers.containsKey(friendship.getFriend1Id())) {
+                mappedUsers.put(friendship.getFriend1Id(), new ArrayList<>());
+            }
+            mappedUsers.get(friendship.getFriend1Id()).add(allUsers.get(friendship.getFriend2Id()));
+        }
+        users.forEach(user -> user.setFriends(mappedUsers.get(user.getId())));
+        return users;
     }
 
     public User updateUserInStorage(User user) {
