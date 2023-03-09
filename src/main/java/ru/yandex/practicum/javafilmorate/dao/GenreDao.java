@@ -48,6 +48,6 @@ public class GenreDao {
     public Genre makeGenre(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         String name = rs.getString("name");
-        return new Genre(id, name);
+        return new Genre(id,name);
     }
 }

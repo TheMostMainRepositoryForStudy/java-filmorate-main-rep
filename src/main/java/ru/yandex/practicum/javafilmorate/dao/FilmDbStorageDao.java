@@ -120,6 +120,7 @@ public class FilmDbStorageDao implements FilmStorage {
             if(film.getGenres() == null || film.getGenres().isEmpty()){
                 return film;
             }
+            System.out.println(film);
             return filmGenreDao.insertFilmGenre(film);
         }
     }

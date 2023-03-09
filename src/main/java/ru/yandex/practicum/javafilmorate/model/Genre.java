@@ -6,7 +6,7 @@ import lombok.*;
 @Setter
 @ToString
 @EqualsAndHashCode
-@Builder
+//@Builder
 public class Genre {
 
     private long id;
@@ -16,6 +16,4 @@ public class Genre {
         this.id = id;
         this.name = name;
     }
-
-
 }
