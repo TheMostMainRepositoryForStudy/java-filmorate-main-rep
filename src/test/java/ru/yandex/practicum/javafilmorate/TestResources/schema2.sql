@@ -2,7 +2,7 @@ drop table if exists FILM cascade;
 drop table if exists GENRE cascade;
 drop table if exists MPA cascade;
 drop table if exists LIKES cascade;
-drop table if exists USER_FILMORATE cascade;
+drop table if exists USERS cascade;
 drop table if exists FILM_GENRE cascade;
 drop table if exists FRIENDSHIP cascade;
 
@@ -65,7 +65,7 @@ create unique index IF NOT EXISTS FILM_GENRE_ID_UINDEX
 create unique index IF NOT EXISTS MPA_ID_UINDEX
     on MPA (ID);
 
-create table IF NOT EXISTS USER_FILMORATE
+create table IF NOT EXISTS USERS
 (
     ID       BIGINT                 auto_increment,
     EMAIL    CHARACTER VARYING(250) not null,
@@ -83,10 +83,10 @@ create table IF NOT EXISTS FRIENDSHIP
     constraint FRIENDSHIP_PK
         primary key (FRIEND1_ID, FRIEND2_ID),
     constraint FRIENDSHIP_USER1_FK
-        foreign key (FRIEND1_ID) references USER_FILMORATE
+        foreign key (FRIEND1_ID) references USERS
             on update cascade on delete cascade,
     constraint FRIENDSHIP_USER2_FK
-        foreign key (FRIEND2_ID) references USER_FILMORATE
+        foreign key (FRIEND2_ID) references USERS
             on update cascade on delete cascade
 );
 
@@ -104,7 +104,7 @@ create table IF NOT EXISTS LIKES
         foreign key (FILM_ID) references FILM
             on update cascade on delete cascade,
     constraint LIKES_USER_FK
-        foreign key (USER_ID) references USER_FILMORATE
+        foreign key (USER_ID) references USERS
             on update cascade on delete cascade
 );
 
@@ -112,4 +112,4 @@ create unique index IF NOT EXISTS LIKES_ID_UINDEX
     on LIKES (ID);
 
 create unique index IF NOT EXISTS USER_ID_UINDEX
-    on USER_FILMORATE (ID);
+    on USERS (ID);

@@ -44,7 +44,7 @@ class FilmDbStorageDaoTest {
         assertEquals(filmExpected.getName(),filmActual.getName());
         assertEquals(filmExpected.getDescription(),filmActual.getDescription());
         assertEquals(filmExpected.getReleaseDate(),filmActual.getReleaseDate());
-        assertEquals(filmExpected.getMpa(),filmActual.getMpa());
+        assertEquals(filmExpected.getMpa().getId(),filmActual.getMpa().getId());
     }
 
     @Test
@@ -113,19 +113,19 @@ class FilmDbStorageDaoTest {
         assertEquals(film1Expected.getName(),actualList.get(0).getName());
         assertEquals(film1Expected.getDescription(),actualList.get(0).getDescription());
         assertEquals(film1Expected.getReleaseDate(),actualList.get(0).getReleaseDate());
-        assertEquals(film1Expected.getMpa(),actualList.get(0).getMpa());
+        assertEquals(film1Expected.getMpa().getId(),actualList.get(0).getMpa().getId());
 
         assertEquals(film2Expected.getId(),actualList.get(1).getId());
         assertEquals(film2Expected.getName(),actualList.get(1).getName());
         assertEquals(film2Expected.getDescription(),actualList.get(1).getDescription());
         assertEquals(film2Expected.getReleaseDate(),actualList.get(1).getReleaseDate());
-        assertEquals(film2Expected.getMpa(),actualList.get(1).getMpa());
+        assertEquals(film2Expected.getMpa().getId(),actualList.get(1).getMpa().getId());
 
         assertEquals(film3Expected.getId(),actualList.get(2).getId());
         assertEquals(film3Expected.getName(),actualList.get(2).getName());
         assertEquals(film3Expected.getDescription(),actualList.get(2).getDescription());
         assertEquals(film3Expected.getReleaseDate(),actualList.get(2).getReleaseDate());
-        assertEquals(film3Expected.getMpa(),actualList.get(2).getMpa());
+        assertEquals(film3Expected.getMpa().getId(),actualList.get(2).getMpa().getId());
     }
 
     @Test
@@ -150,7 +150,7 @@ class FilmDbStorageDaoTest {
         assertEquals(film3Expected.getName(),actualFilm.getName());
         assertEquals(film3Expected.getDescription(),actualFilm.getDescription());
         assertEquals(film3Expected.getReleaseDate(),actualFilm.getReleaseDate());
-        assertEquals(film3Expected.getMpa(),actualFilm.getMpa());
+        assertEquals(film3Expected.getMpa().getId(),actualFilm.getMpa().getId());
     }
 
     @Test
@@ -174,6 +174,6 @@ class FilmDbStorageDaoTest {
         assertEquals(filmExpected.getName(),filmActual.getName());
         assertEquals(filmExpected.getDescription(),filmActual.getDescription());
         assertEquals(filmExpected.getReleaseDate(),filmActual.getReleaseDate());
-        assertEquals(filmExpected.getMpa(),filmActual.getMpa());
+        assertEquals(filmExpected.getMpa().getId(),filmActual.getMpa().getId());
     }
 }

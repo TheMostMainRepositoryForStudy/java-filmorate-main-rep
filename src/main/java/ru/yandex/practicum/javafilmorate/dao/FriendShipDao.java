@@ -44,7 +44,7 @@ public class FriendShipDao {
     public List<User> getUserFriends(long id){
         String sql =    "SELECT  UF.id, UF.email, UF.login, UF.name, UF.birthday " +
                         "FROM FRIENDSHIP f " +
-                        "LEFT JOIN USER_FILMORATE UF on f.FRIEND2_ID = UF.ID " +
+                        "LEFT JOIN USERS UF on f.FRIEND2_ID = UF.ID " +
                         "WHERE FRIEND1_ID = ?";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), id);
@@ -54,7 +54,7 @@ public class FriendShipDao {
 
         String sql2 =   "SELECT UF.ID, UF.EMAIL, UF.LOGIN, UF.NAME, UF.BIRTHDAY \n" +
                         "FROM FRIENDSHIP F\n" +
-                        "INNER JOIN USER_FILMORATE UF ON F.FRIEND2_ID = UF.ID\n" +
+                        "INNER JOIN USERS UF ON F.FRIEND2_ID = UF.ID\n" +
                         "WHERE FRIEND1_ID = ? AND FRIEND2_ID IN (\n" +
                                                           "        SELECT FRIEND2_ID\n" +
                                                           "        FROM FRIENDSHIP\n" +

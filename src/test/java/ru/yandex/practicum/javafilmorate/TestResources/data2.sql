@@ -12,7 +12,7 @@ values  (1, 'G'),
         (4, 'R'),
         (5, 'NC-17');
 
-INSERT INTO USER_FILMORATE (email, login, name, birthday)
+INSERT INTO USERS (email, login, name, birthday)
 VALUES  ('doritos@gmail.com', 'dorito', 'Mark', DATE '2021-12-12'),
         ('pizza@dodo,com','chiken', 'Theodore', DATE '2020-12-12'),
         ('zavtra@net.net','nofuture', 'Dead', DATE '2019-12-12');

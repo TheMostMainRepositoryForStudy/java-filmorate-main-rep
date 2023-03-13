@@ -23,7 +23,7 @@ public class LikeDao {
     public List<User> getFilmLikes(long id){
         String sql =    "SELECT  UF.id, UF.email, UF.login, UF.name, UF.birthday " +
                         "FROM likes l " +
-                        "LEFT JOIN USER_FILMORATE UF on l.USER_ID = UF.ID " +
+                        "LEFT JOIN USERS UF on l.USER_ID = UF.ID " +
                         "WHERE film_id = ? ";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), id);

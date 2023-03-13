@@ -28,7 +28,7 @@ public class UserDbStorageDao implements UserStorage {
 
     @Override
     public User addUser(User user) {
-        String sqlQuery = "insert into USER_FILMORATE(  EMAIL, login, name, birthday)" +
+        String sqlQuery = "insert into USERS ( EMAIL, login, name, birthday)" +
                           "values (?,?,?,?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -50,7 +50,7 @@ public class UserDbStorageDao implements UserStorage {
     @Override
     public User getUser(Long id) {
         String sql = "SELECT id, email,login,name,birthday " +
-                     "FROM user_filmorate " +
+                     "FROM USERS " +
                      "WHERE id = ? LIMIT 1";
         try {
             User user = jdbcTemplate.queryForObject(sql,
@@ -70,7 +70,7 @@ public class UserDbStorageDao implements UserStorage {
     @Override
     public User removeUser(Long id) {
         User user = getUser(id);
-        String sql = "DELETE FROM USER_FILMORATE \n" +
+        String sql = "DELETE FROM USERS \n" +
                      "WHERE id = ?";
         jdbcTemplate.update(sql, id);
         return user;
@@ -79,7 +79,7 @@ public class UserDbStorageDao implements UserStorage {
     @Override
     public User updateUser(User user) {
 
-        String sqlQuery = "UPDATE USER_FILMORATE " +
+        String sqlQuery = "UPDATE USERS " +
     "                      SET   email = ?," +
                                 "login = ?," +
                                 "name = ?," +
@@ -104,7 +104,7 @@ public class UserDbStorageDao implements UserStorage {
     public List<User> getAllUsers() {
 
         String sql = "SELECT id, email, login, name, birthday\n" +
-                     "FROM USER_FILMORATE";
+                     "FROM USERS";
         return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs));
     }
 
@@ -112,7 +112,7 @@ public class UserDbStorageDao implements UserStorage {
     public List<User> getUserFriends(long id){
         String sql =    "SELECT  UF.id, UF.email, UF.login, UF.name, UF.birthday " +
                 "FROM FRIENDSHIP f " +
-                "LEFT JOIN USER_FILMORATE UF on f.FRIEND2_ID = UF.ID " +
+                "LEFT JOIN USERS UF on f.FRIEND2_ID = UF.ID " +
                 "WHERE FRIEND1_ID = ?";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), id);
